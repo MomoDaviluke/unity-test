@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3b8375f2e0e874c4eb3d60ccb4b87ef3, type: 3}
+  m_Name: Blue wolf amor
+  m_EditorClassIdentifier: 
+  itemType: 1
+  itemName: "\u84DD\u72FC\u94E0\u7532"
+  itemIcon: {fileID: 288293509, guid: a9ca9a41598dd2e44b125928045c518f, type: 3}
+  itemId: 09e1b2a7c4ae2874d9ac8dc42e603381
+  dropChance: 0
+  equipmentType: 1
+  itemCooldown: 5
+  itemEffects:
+  - {fileID: 11400000, guid: 5734600e8382707429e93e33f75e5c3c, type: 2}
+  strength: 4
+  agility: 0
+  intelligence: 0
+  vitality: 0
+  damage: 0
+  critChance: 0
+  critPower: 0
+  health: 50
+  armor: 15
+  evasion: 0
+  magicResistance: 15
+  fireDamage: 0
+  iceDamage: 0
+  lightingDamage: 0
+  craftRequirements:
+  - data: {fileID: 11400000, guid: 0bf25dcb2f86bcd4d8c2527066f69952, type: 2}
+    stackSize: 0
