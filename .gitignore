@@ -26,6 +26,9 @@
 # Visual Studio cache directory
 .vs/
 
+# IDE tool cache (Cursor hooks state)
+.cursor/
+
 # Gradle cache directory
 .gradle/
 
