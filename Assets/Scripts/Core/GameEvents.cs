@@ -14,6 +14,7 @@ public static class GameEvents
     public static event Action<int> OnCurrencyChanged;                 // 货币变化（新值）
     public static event Action<ItemData, int> OnItemPickedUp;          // 拾取物品（物品、数量）
     public static event Action<int> OnSlotUpdated;                     // 背包槽位刷新（槽位索引）
+    public static event Action OnInventoryUpdated;                     // 库存整体刷新（Phase 3：增删/装备后触发）
     public static event Action<string> OnSkillCooldown;                // 技能进入冷却（技能标识）
     public static event Action OnPlayerDead;                           // 玩家死亡（Phase 3 接入生产者）
 
@@ -21,6 +22,7 @@ public static class GameEvents
     public static void CurrencyChanged(int _newAmount) => OnCurrencyChanged?.Invoke(_newAmount);
     public static void ItemPickedUp(ItemData _item, int _amount) => OnItemPickedUp?.Invoke(_item, _amount);
     public static void SlotUpdated(int _slotIndex) => OnSlotUpdated?.Invoke(_slotIndex);
+    public static void InventoryUpdated() => OnInventoryUpdated?.Invoke();
     public static void SkillCooldown(string _skillId) => OnSkillCooldown?.Invoke(_skillId);
     public static void PlayerDead() => OnPlayerDead?.Invoke();
 }
