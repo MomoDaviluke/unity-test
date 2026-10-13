@@ -6,6 +6,8 @@ using UnityEngine;
 /// <summary>
 /// PopUpTextFx（弹出文本特效）- 控制伤害数字等弹出文本的动画
 /// 功能：上升移动、透明度渐变、自动销毁
+/// Phase 2 池化接入：实例由 PoolManager 复用，OnEnable 每次取出时重置
+/// 计时器/速度/字号/透明度（暴击的 fontSize += 2 若不还原会跨次累积放大）。
 /// </summary>
 public class PopUpTextFx : MonoBehaviour
 {
@@ -21,11 +23,29 @@ public class PopUpTextFx : MonoBehaviour
     [SerializeField] private float lifeTime;
     private float textTimer;
 
+    // ==================== 复用基准值（池化重置用，Awake 仅首建时捕获一次） ====================
+    private float initialSpeed;
+    private float baseFontSize;
+
     // ==================== 初始化 ====================
-    void Start()
+    // Awake 而非 Start：池化复用时 OnEnable 先于 Start 且 Start 只执行一次，
+    // 基准值必须在首次激活前就绪供 OnEnable 使用
+    void Awake()
     {
         myText = GetComponent<TextMeshPro>();
+        initialSpeed = speed;
+        baseFontSize = myText.fontSize;
+    }
+
+    // ==================== 复用重置 ====================
+    void OnEnable()
+    {
         textTimer = lifeTime;
+        speed = initialSpeed;
+        myText.fontSize = baseFontSize;
+        Color c = myText.color;
+        c.a = 1f;
+        myText.color = c;
     }
 
     // ==================== 上升与渐隐 ====================
@@ -47,7 +67,7 @@ public class PopUpTextFx : MonoBehaviour
                 speed = disappearanceSpeed;
 
             if (myText.color.a <= 0)
-                Destroy(gameObject);
+                PoolManager.Instance.Despawn(gameObject);
         }
     }
 }

@@ -6,12 +6,11 @@ using System.Linq;
 /// <summary>
 /// SaveManager（存档管理器）- 协调游戏中所有需要保存/加载数据的对象
 /// 功能：管理存档文件、协调各系统的存档/加载、新游戏初始化
+/// Phase 2：继承 Singleton&lt;SaveManager&gt;；执行顺序 -300（最先初始化，其余 Manager 依赖其存档数据分发）
 /// </summary>
-public class SaveManager : MonoBehaviour
+[DefaultExecutionOrder(-300)]
+public class SaveManager : Singleton<SaveManager>
 {
-    // ==================== 单例 ====================
-    public static SaveManager instance;
-
     // ==================== 存档设置 ====================
     [SerializeField] private string fileName;
     [SerializeField] private bool encryptData;
@@ -20,15 +19,6 @@ public class SaveManager : MonoBehaviour
     private GameData gameData;
     private List<ISaveManager> saveManagers = new List<ISaveManager>();
     private FileDataHandler dataHandler;
-
-    // ==================== 单例初始化 ====================
-    private void Awake()
-    {
-        if (instance != null)
-            Destroy(instance.gameObject);
-        else
-            instance = this;
-    }
 
     private void Start()
     {

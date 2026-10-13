@@ -5,12 +5,11 @@ using UnityEngine;
 /// <summary>
 /// AudioManager（音频管理器）- 管理音效和背景音乐的播放
 /// 功能：SFX播放（距离检测）、BGM管理、音量渐变
+/// Phase 2：继承 Singleton&lt;AudioManager&gt;；执行顺序 -200
 /// </summary>
-public class AudioManager : MonoBehaviour
+[DefaultExecutionOrder(-200)]
+public class AudioManager : Singleton<AudioManager>
 {
-    // ==================== 单例 ====================
-    public static AudioManager instance;
-
     // ==================== 音频设置 ====================
     [SerializeField] private float sfxMinimumDistance;
     [SerializeField] private AudioSource[] sfx;
@@ -21,13 +20,11 @@ public class AudioManager : MonoBehaviour
     private int bgmIndex;
     private bool canPlaySFX;
 
-    // ==================== 单例初始化 ====================
-    private void Awake()
+    // ==================== 初始化 ====================
+    protected override void Awake()
     {
-        if (instance != null)
-            Destroy(instance.gameObject);
-        else
-            instance = this;
+        base.Awake(); // 单例判重由基类完成
+
         Invoke("AllowSFX", 1f);
     }
 

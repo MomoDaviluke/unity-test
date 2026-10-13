@@ -7,12 +7,11 @@ using UnityEngine.SceneManagement;
 /// LevelManager（关卡管理器）- 管理关卡切换和叠加场景加载
 /// 设计思路：使用叠加场景（Additive）加载关卡，主场景保持常驻
 /// 使用场景：通关后加载下一关、死亡后重启当前关卡、返回主菜单
+/// Phase 2：继承 Singleton&lt;LevelManager&gt;；执行顺序 -100（依赖 SaveManager/PlayerManager 先就位）
 /// </summary>
-public class LevelManager : MonoBehaviour, ISaveManager
+[DefaultExecutionOrder(-100)]
+public class LevelManager : Singleton<LevelManager>, ISaveManager
 {
-    // ==================== 单例 ====================
-    public static LevelManager instance;
-
     // ==================== 关卡设置 ====================
     [Header("关卡设置")]
     [SerializeField] private List<string> levelNames = new List<string>
@@ -26,15 +25,6 @@ public class LevelManager : MonoBehaviour, ISaveManager
     public int currentLevelIndex = 0;
     public string currentLevelName { get; private set; }
     public bool isLoading { get; private set; }
-
-    // ==================== 单例初始化 ====================
-    private void Awake()
-    {
-        if (instance != null)
-            Destroy(instance.gameObject);
-        else
-            instance = this;
-    }
 
     // ==================== 启动初始化 ====================
     private void Start()
@@ -161,7 +151,9 @@ public class LevelManager : MonoBehaviour, ISaveManager
     }
 
     // ==================== 玩家位置管理 ====================
-    // 移动玩家到初始位置，包含重试机制
+    // 修复 B8：执行顺序固化（LevelManager -100 晚于 PlayerManager -200）后，
+    // PlayerManager.instance.player 在本协程执行时必已就位，删除原"二次重试 + FindObjectOfType 兜底"补丁。
+    // 保留 0.5s 等待：Additive 关卡加载完成到玩家稳定生成之间维持既有表现。
     private IEnumerator MovePlayerToInitialPositionCoroutine()
     {
         yield return new WaitForSeconds(0.5f);
@@ -175,26 +167,7 @@ public class LevelManager : MonoBehaviour, ISaveManager
         }
         else
         {
-            yield return new WaitForSeconds(0.5f);
-
-            if (PlayerManager.instance != null && PlayerManager.instance.player != null)
-            {
-                PlayerManager.instance.player.transform.position = initialPosition;
-                Debug.Log($"[LevelManager] 玩家已移动到初始位置（第二次尝试）: {initialPosition}");
-            }
-            else
-            {
-                Player player = FindObjectOfType<Player>();
-                if (player != null)
-                {
-                    player.transform.position = initialPosition;
-                    Debug.Log($"[LevelManager] 玩家已移动到初始位置（直接查找）: {initialPosition}");
-                }
-                else
-                {
-                    Debug.LogWarning($"[LevelManager] 玩家对象未找到");
-                }
-            }
+            Debug.LogError("[LevelManager] PlayerManager 或玩家引用为空，无法移动到初始位置");
         }
     }
 

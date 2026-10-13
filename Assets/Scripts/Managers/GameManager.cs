@@ -6,12 +6,11 @@ using UnityEngine.SceneManagement;
 /// <summary>
 /// GameManager（游戏管理器）- 管理检查点、死亡掉落和场景重启
 /// 功能：检查点管理、死亡掉落货币、游戏暂停
+/// Phase 2：继承 Singleton&lt;GameManager&gt;；执行顺序 -200
 /// </summary>
-public class GameManager : MonoBehaviour, ISaveManager
+[DefaultExecutionOrder(-200)]
+public class GameManager : Singleton<GameManager>, ISaveManager
 {
-    // ==================== 单例 ====================
-    public static GameManager instance;
-
     // ==================== 核心引用 ====================
     private Transform player;
     [SerializeField] private Checkpoint[] checkpoints;
@@ -24,13 +23,10 @@ public class GameManager : MonoBehaviour, ISaveManager
     [SerializeField] private float lostCurrencyX;
     [SerializeField] private float lostCurrencyY;
 
-    // ==================== 单例初始化 ====================
-    private void Awake()
+    // ==================== 初始化 ====================
+    protected override void Awake()
     {
-        if (instance != null)
-            Destroy(instance.gameObject);
-        else
-            instance = this;
+        base.Awake(); // 单例判重由基类完成
 
         checkpoints = FindObjectsOfType<Checkpoint>();
     }
