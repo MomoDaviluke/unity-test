@@ -40,7 +40,9 @@ public class PopUpTextFx : MonoBehaviour
             float alpha = myText.color.a - colorDisappearanceSpeed * Time.deltaTime;
             myText.color = new Color(myText.color.r, myText.color.g, myText.color.b, alpha);
 
-            if (myText.color.a < 50)
+            // 修复 B4：原判断 alpha < 50 对 0~1 的 alpha 恒为 false，导致"加速消失"逻辑失效。
+            // Color.a 取值 0~1，按"开始淡出即切换到 disappearanceSpeed"的原意改为 > 0.5f。
+            if (myText.color.a > 0.5f)
                 speed = disappearanceSpeed;
 
             if (myText.color.a <= 0)
