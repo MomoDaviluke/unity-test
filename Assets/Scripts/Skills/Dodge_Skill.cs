@@ -44,10 +44,8 @@ public class Dodge_Skill : Skill
             if (player != null && player.stats != null)
             {
                 player.stats.evasion.AddModifier(evasionAmount);
-                if (Inventory.instance != null)
-                {
-                    Inventory.instance.UpdateStatsUI();
-                }
+                // Phase 3 解耦：属性变化经事件总线广播，UI 侧订阅刷新（原直接调 Inventory.UpdateStatsUI）
+                GameEvents.InventoryUpdated();
             }
             dodgeUnlocked = true;
         }
