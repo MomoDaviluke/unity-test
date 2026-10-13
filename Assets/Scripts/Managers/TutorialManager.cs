@@ -6,12 +6,11 @@ using UnityEngine;
 /// TutorialManager（教程管理器）- 管理教程面板的显示和存档
 /// 设计思路：使用PlayerPrefs记录已显示的教程，避免重复显示
 /// 使用场景：新手引导、操作提示、机制说明
+/// Phase 2：继承 Singleton&lt;TutorialManager&gt;；执行顺序 -200
 /// </summary>
-public class TutorialManager : MonoBehaviour
+[DefaultExecutionOrder(-200)]
+public class TutorialManager : Singleton<TutorialManager>
 {
-    // ==================== 单例 ====================
-    public static TutorialManager instance;
-
     // ==================== 教程UI ====================
     [Header("教程UI")]
     [SerializeField] private GameObject tutorialPanel;
@@ -31,16 +30,10 @@ public class TutorialManager : MonoBehaviour
     private Coroutine currentCoroutine;
     private HashSet<string> shownTutorials;
 
-    // ==================== 单例初始化 ====================
-    private void Awake()
+    // ==================== 初始化 ====================
+    protected override void Awake()
     {
-        if (instance == null)
-            instance = this;
-        else
-        {
-            Destroy(gameObject);
-            return;
-        }
+        base.Awake(); // 单例判重由基类完成
 
         if (tutorialPanel != null)
         {
