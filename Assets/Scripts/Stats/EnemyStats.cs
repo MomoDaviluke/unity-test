@@ -2,13 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// EnemyStats（敌人属性）- 继承自CharacterStats，处理等级加成和掉落
+/// </summary>
 public class EnemyStats : CharacterStats
 {
     private Enemy enemy;
     private ItemDrop myDropSystem;
     public Stat soulsDropAmount;
-    
-    // 受击回调
     public System.Action onTakeDamage;
 
     [Header("Level datail")]
@@ -21,7 +22,6 @@ public class EnemyStats : CharacterStats
     {
         soulsDropAmount.SetDefaultValue(100);
         ApplyLevelModifiers();
-
         base.Start();
 
         enemy = GetComponent<Enemy>();
@@ -34,20 +34,16 @@ public class EnemyStats : CharacterStats
         Modify(agility);
         Modify(intelligence);
         Modify(vitality);
-
         Modify(damage);
         Modify(critChance);
         Modify(critpower);
-
         Modify(maxHealth);
         Modify(armor);
         Modify(evasion);
         Modify(magicResistance);
-
         Modify(fireDamage);
         Modify(iceDamage);
         Modify(lightningDamage);
-
         Modify(soulsDropAmount);
     }
 
@@ -63,23 +59,19 @@ public class EnemyStats : CharacterStats
     public override void TakeDamage(int _damage)
     {
         base.TakeDamage(_damage);
-        
         onTakeDamage?.Invoke();
     }
+
     protected override void Die()
     {
         if (isDead)
             return;
+
         isDead = true;
-
-
         base.Die();
         enemy.Die();
 
         PlayerManager.instance.currency += soulsDropAmount.GetValue();
         myDropSystem.GenerateDrop();
-
-
     }
-
 }
