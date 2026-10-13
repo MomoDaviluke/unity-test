@@ -5,6 +5,9 @@ using TMPro;
 /// <summary>
 /// UI_InGame（游戏内UI）- 显示血条、技能冷却、灵魂值
 /// 功能：血量显示、技能图标冷却、灵魂值平滑增长
+/// Phase 3 解耦：血条沿用 onHealthChanged 事件；灵魂值目标改由 OnCurrencyChanged 推送（消除每帧读 PlayerManager）；
+/// 药水瓶装备状态缓存为布尔值并经 OnInventoryUpdated 更新（消除按键时的字典扫描）。
+/// 冷却遮罩的逐帧递减是时间驱动动画（非状态轮询），保留在 Update。
 /// </summary>
 public class UI_InGame : MonoBehaviour
 {
@@ -30,6 +33,12 @@ public class UI_InGame : MonoBehaviour
     [SerializeField] private float soulsAmount;
     [SerializeField] private float increaseRate;
 
+    // 灵魂值目标：由 OnCurrencyChanged 推送，Update 只做平滑动画
+    private int soulsTarget;
+
+    // 药水瓶装备状态缓存：经 OnInventoryUpdated 更新，避免按键时扫描装备字典
+    private bool flaskEquipped;
+
     // ==================== 初始化 ====================
     void Start()
     {
@@ -37,6 +46,40 @@ public class UI_InGame : MonoBehaviour
             playerStats.onHealthChanged += UpdateHealthUI;
 
         skills = SkillManager.instance;
+
+        // 订阅后立即主动拉一次初值（防漏首次刷新）
+        soulsTarget = PlayerManager.instance != null ? PlayerManager.instance.GetCurrency() : 0;
+        soulsAmount = soulsTarget;
+        RefreshFlaskState();
+    }
+
+    // ==================== 事件订阅 ====================
+    private void OnEnable()
+    {
+        GameEvents.OnCurrencyChanged += OnCurrencyChanged;
+        GameEvents.OnInventoryUpdated += OnInventoryUpdated;
+    }
+
+    private void OnDisable()
+    {
+        GameEvents.OnCurrencyChanged -= OnCurrencyChanged;
+        GameEvents.OnInventoryUpdated -= OnInventoryUpdated;
+    }
+
+    private void OnCurrencyChanged(int _newAmount)
+    {
+        soulsTarget = _newAmount;
+    }
+
+    private void OnInventoryUpdated()
+    {
+        RefreshFlaskState();
+    }
+
+    private void RefreshFlaskState()
+    {
+        flaskEquipped = Inventory.instance != null
+            && Inventory.instance.GetEquipment(EquipmentType.Flask) != null;
     }
 
     // ==================== 更新 ====================
@@ -56,7 +99,7 @@ public class UI_InGame : MonoBehaviour
             SetCooldownOf(swordImage);
         if (Input.GetKeyDown(KeyCode.R) && skills.blackhole.blackHoleUnlocked)
             SetCooldownOf(blackholeImage);
-        if (Input.GetKeyDown(KeyCode.Alpha1) && Inventory.instance.GetEquipment(EquipmentType.Flask) != null)
+        if (Input.GetKeyDown(KeyCode.Alpha1) && flaskEquipped)
             SetCooldownOf(flaskImage);
 
         // 更新所有技能冷却显示
@@ -69,13 +112,13 @@ public class UI_InGame : MonoBehaviour
     }
 
     // ==================== 灵魂值显示 ====================
-    // 平滑增长显示灵魂值
+    // 平滑增长显示灵魂值（目标值由事件推送，此处仅做动画插值）
     private void UpdataSoulsUI()
     {
-        if (soulsAmount < PlayerManager.instance.GetCurrency())
+        if (soulsAmount < soulsTarget)
             soulsAmount += increaseRate * Time.deltaTime;
         else
-            soulsAmount = PlayerManager.instance.GetCurrency();
+            soulsAmount = soulsTarget;
 
         currentSouls.text = ((int)soulsAmount).ToString();
     }
