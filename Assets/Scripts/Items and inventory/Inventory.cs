@@ -45,7 +45,9 @@ public class Inventory : MonoBehaviour, ISaveManager
     // ==================== 冷却系统 ====================
     [Header("物品冷却")]
     private float lastTimeUsedFlask;
-    private float lastTimeUsedAmulet;
+    // 修复 B3：该字段实际只被护甲冷却使用（护符效果路径不检查冷却），
+    // 原名 lastTimeUsedAmulet 属命名污染，重命名为语义一致的 lastTimeUsedArmor。
+    private float lastTimeUsedArmor;
 
     public float flaskCooldown { get; private set; }
     private float armorCooldown;
@@ -88,7 +90,7 @@ public class Inventory : MonoBehaviour, ISaveManager
 
         // 初始化冷却时间（设为很早以前，确保首次可用）
         lastTimeUsedFlask = -999f;
-        lastTimeUsedAmulet = -999f;
+        lastTimeUsedArmor = -999f;
     }
 
     // ==================== 初始物品 ====================
@@ -374,10 +376,10 @@ public class Inventory : MonoBehaviour, ISaveManager
             return false;
 
         // 检查冷却
-        if (Time.time > lastTimeUsedAmulet + armorCooldown)
+        if (Time.time > lastTimeUsedArmor + armorCooldown)
         {
             armorCooldown = currentArmor.itemCooldown;
-            lastTimeUsedAmulet = Time.time;
+            lastTimeUsedArmor = Time.time;
             return true;
         }
         return false;
