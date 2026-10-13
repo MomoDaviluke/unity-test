@@ -10,6 +10,11 @@ using UnityEngine;
 /// </summary>
 public class UI : MonoBehaviour, ISaveManager
 {
+    // ==================== 单例 ====================
+    // 修复 B9：提供静态引用，使 PlayerDeadState 等调用方不再依赖 GameObject.Find("Canvas")。
+    // 沿用项目既有弱单例惯例（同 AudioManager.instance）。UI 全项目仅挂 MainScene 一个 Canvas。
+    public static UI instance;
+
     // ==================== 结束画面 ====================
     [Header("结束画面")]
     [SerializeField] private UI_FadeScreen fadeScreen;
@@ -37,6 +42,12 @@ public class UI : MonoBehaviour, ISaveManager
     // ==================== 初始化 ====================
     private void Awake()
     {
+        // 修复 B9：注册单例（同 AudioManager 惯例：重复实例销毁旧的）
+        if (instance != null && instance != this)
+            Destroy(instance.gameObject);
+        else
+            instance = this;
+
         SwitchTo(skillTreeUI);
         fadeScreen.gameObject.SetActive(true);
     }

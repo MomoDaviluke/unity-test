@@ -25,7 +25,11 @@ public class PlayerDeadState : PlayerState
     public override void Enter()
     {
         base.Enter();
-        GameObject.Find("Canvas").GetComponent<UI>().SwitchOnEndScreen();
+        // 修复 B9：改用 UI 单例，不再 GameObject.Find("Canvas")（Canvas 改名即崩、运行时查找昂贵）
+        if (UI.instance != null)
+            UI.instance.SwitchOnEndScreen();
+        else
+            Debug.LogError("[PlayerDeadState] UI.instance 为空，无法显示结束画面");
     }
 
     public override void Exit()
