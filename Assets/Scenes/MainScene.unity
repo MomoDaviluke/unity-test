@@ -23422,6 +23422,7 @@ MonoBehaviour:
   statSlotParent: {fileID: 1521103849}
   loadedItems: []
   loadedEquipment: []
+  itemDatabase: {fileID: 11400000, guid: cde2fa2880534d389a1911cbc0a52dbe, type: 2}
 --- !u!4 &1025716237
 Transform:
   m_ObjectHideFlags: 0
