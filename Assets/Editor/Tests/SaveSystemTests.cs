@@ -104,4 +104,66 @@ public class SaveSystemTests
         handler.Delete();
         Assert.IsFalse(File.Exists(Path.Combine(tempDir, "data.sav")));
     }
+
+    // ==================== B7：存档版本号与迁移 ====================
+
+    [Test]
+    public void SaveLoad_PersistsVersionNumber()
+    {
+        // 注：写入前盖版本号由 SaveManager.SaveGame 负责（MonoBehaviour，此处不覆盖），
+        // 本用例只验证 saveVersion 字段本身的序列化往返。
+        var handler = new FileDataHandler(tempDir, "v.sav", false);
+        var data = new GameData();
+        data.saveVersion = GameData.CurrentVersion;
+        handler.Save(data);
+
+        var loaded = handler.Load();
+        Assert.IsNotNull(loaded);
+        Assert.AreEqual(GameData.CurrentVersion, loaded.saveVersion, "存档往返应保留版本号");
+    }
+
+    [Test]
+    public void Load_LegacySaveWithoutVersion_IsDetectedAsZero()
+    {
+        // 模拟引入版本号之前的旧档：正常序列化后删除 saveVersion 字段
+        var data = new GameData();
+        data.currency = 7;
+        string json = JsonUtility.ToJson(data, true);
+        json = System.Text.RegularExpressions.Regex.Replace(json, @"\s*""saveVersion"":\s*\d+,?", "");
+        File.WriteAllText(Path.Combine(tempDir, "legacy.sav"), json);
+
+        var handler = new FileDataHandler(tempDir, "legacy.sav", false);
+        var loaded = handler.Load();
+
+        Assert.IsNotNull(loaded);
+        Assert.AreEqual(7, loaded.currency, "旧档其余字段应正常读取");
+        Assert.AreEqual(0, loaded.saveVersion, "旧档缺失 saveVersion 时应视为 v0");
+    }
+
+    [Test]
+    public void MigrateSaveData_UpgradesLegacySaveToCurrentVersion()
+    {
+        var legacy = new GameData();
+        legacy.saveVersion = 0; // v0
+        legacy.currency = 42;
+
+        GameData.MigrateSaveData(legacy);
+
+        Assert.AreEqual(GameData.CurrentVersion, legacy.saveVersion, "应迁移到当前版本");
+        Assert.AreEqual(42, legacy.currency, "迁移不应影响既有数据");
+        Assert.IsNotNull(legacy.inventory, "迁移后集合字段应可用");
+    }
+
+    [Test]
+    public void MigrateSaveData_CurrentSave_IsNoOp()
+    {
+        var data = new GameData();
+        data.saveVersion = GameData.CurrentVersion;
+        data.currency = 99;
+
+        GameData.MigrateSaveData(data);
+
+        Assert.AreEqual(GameData.CurrentVersion, data.saveVersion);
+        Assert.AreEqual(99, data.currency);
+    }
 }

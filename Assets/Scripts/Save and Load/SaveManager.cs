@@ -70,11 +70,17 @@ public class SaveManager : MonoBehaviour
     {
         gameData = dataHandler.Load();
 
-        if (this.gameData == null)
+        if (gameData == null)
         {
             Debug.Log("没有找到存档");
+            // 修复 B7：NewGame 内部已调用各 ISaveManager.LoadData，此处直接返回，
+            // 避免下方再次遍历导致 LoadData 被重复调用。
             NewGame();
+            return;
         }
+
+        // 修复 B7：加载后按版本号迁移旧档
+        GameData.MigrateSaveData(gameData);
 
         foreach (ISaveManager saveManager in saveManagers)
             saveManager.LoadData(gameData);
@@ -83,6 +89,9 @@ public class SaveManager : MonoBehaviour
     // ==================== 保存游戏 ====================
     public void SaveGame()
     {
+        // 修复 B7：写入前盖上当前存档版本，供下次加载判断是否需要迁移
+        gameData.saveVersion = GameData.CurrentVersion;
+
         foreach (ISaveManager saveManager in saveManagers)
             saveManager.SaveData(ref gameData);
 
