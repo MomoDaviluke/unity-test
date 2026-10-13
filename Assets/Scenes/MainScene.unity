@@ -23393,6 +23393,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1025716237}
   - component: {fileID: 1025716236}
+  - component: {fileID: 1025716238}
   m_Layer: 0
   m_Name: inventory
   m_TagString: Untagged
@@ -23416,13 +23417,27 @@ MonoBehaviour:
   equipment: []
   inventory: []
   stash: []
+  inventoryCapacity: 18
+  stashCapacity: 13
+  loadedItems: []
+  loadedEquipment: []
+  itemDatabase: {fileID: 11400000, guid: cde2fa2880534d389a1911cbc0a52dbe, type: 2}
+--- !u!114 &1025716238
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1025716235}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d48b6f21c0a37e952b8c1d63f47a0e58, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
   inventorySlotParent: {fileID: 653510219}
   stashSloatParent: {fileID: 433529956}
   equipmentSlotParent: {fileID: 1360225554}
   statSlotParent: {fileID: 1521103849}
-  loadedItems: []
-  loadedEquipment: []
-  itemDatabase: {fileID: 11400000, guid: cde2fa2880534d389a1911cbc0a52dbe, type: 2}
 --- !u!4 &1025716237
 Transform:
   m_ObjectHideFlags: 0

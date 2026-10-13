@@ -27,17 +27,11 @@ public class Inventory : MonoBehaviour, ISaveManager
     public List<InventoryItem> stash;
     public Dictionary<ItemData, InventoryItem> stashDictianory;
 
-    // ==================== UI引用 ====================
-    [Header("背包UI")]
-    [SerializeField] private Transform inventorySlotParent;
-    [SerializeField] private Transform stashSloatParent;
-    [SerializeField] private Transform equipmentSlotParent;
-    [SerializeField] private Transform statSlotParent;
-
-    private UI_itemSlot[] inventoryItemSlot;
-    private UI_itemSlot[] stashItemSlot;
-    private UI_EquipmentSlot[] equipmentSlot;
-    private UI_StatSlot[] statSlot;
+    // ==================== 容量（Phase 3 解耦：原由 UI 槽位数量隐式决定，现显式序列化） ====================
+    // 默认值与 MainScene 现有槽位数一致（背包 18 / 仓库 13），行为不变。
+    [Header("容量")]
+    [SerializeField] private int inventoryCapacity = 18;
+    [SerializeField] private int stashCapacity = 13;
 
     // ==================== 冷却系统 ====================
     [Header("物品冷却")]
@@ -80,13 +74,7 @@ public class Inventory : MonoBehaviour, ISaveManager
         equipment = new List<InventoryItem>();
         equipmentDictianory = new Dictionary<ItemData_Equipment, InventoryItem>();
 
-        // 获取UI槽位引用
-        inventoryItemSlot = inventorySlotParent.GetComponentsInChildren<UI_itemSlot>();
-        stashItemSlot = stashSloatParent.GetComponentsInChildren<UI_itemSlot>();
-        equipmentSlot = equipmentSlotParent.GetComponentsInChildren<UI_EquipmentSlot>();
-        statSlot = statSlotParent.GetComponentsInChildren<UI_StatSlot>();
-
-        UpdateSloatUI();
+        // Phase 3 解耦：不再持有/刷新 UI 槽位（由 UI_InventoryPresenter 订阅 OnInventoryUpdated 自行刷新）
         AddStartingItems();
 
         // 初始化冷却时间（设为很早以前，确保首次可用）
@@ -152,7 +140,7 @@ public class Inventory : MonoBehaviour, ISaveManager
         equipment.Add(newItem);
         equipmentDictianory.Add(newEquipment, newItem);
         newEquipment.AddModifiers();
-        UpdateSloatUI();
+        GameEvents.InventoryUpdated();
     }
 
     // 卸下装备：移除属性加成
@@ -164,47 +152,6 @@ public class Inventory : MonoBehaviour, ISaveManager
             equipmentDictianory.Remove(itemToRemove);
             itemToRemove.RemoveModifiers();
         }
-    }
-
-    // ==================== UI更新 ====================
-    private void UpdateSloatUI()
-    {
-        // 清空装备槽
-        for (int i = 0; i < equipmentSlot.Length; i++)
-            equipmentSlot[i].CleanUpSloat();
-
-        // 更新装备槽
-        for (int i = 0; i < equipmentSlot.Length; i++)
-        {
-            foreach (KeyValuePair<ItemData_Equipment, InventoryItem> item in equipmentDictianory)
-            {
-                if (item.Key.equipmentType == equipmentSlot[i].slotType)
-                    equipmentSlot[i].UpdateSlots(item.Value);
-            }
-        }
-
-        // 清空背包和仓库槽
-        for (int i = 0; i < inventoryItemSlot.Length; i++)
-            inventoryItemSlot[i].CleanUpSloat();
-        for (int i = 0; i < stashItemSlot.Length; i++)
-            stashItemSlot[i].CleanUpSloat();
-
-        // 更新背包槽
-        for (int i = 0; i < inventory.Count && i < inventoryItemSlot.Length; i++)
-            inventoryItemSlot[i].UpdateSlots(inventory[i]);
-
-        // 更新仓库槽
-        for (int i = 0; i < stash.Count && i < stashItemSlot.Length; i++)
-            stashItemSlot[i].UpdateSlots(stash[i]);
-
-        UpdateStatsUI();
-    }
-
-    // ==================== 属性UI更新 ====================
-    public void UpdateStatsUI()
-    {
-        for (int i = 0; i < statSlot.Length; i++)
-            statSlot[i].UpdateStatValueUI();
     }
 
     // ==================== 物品添加 ====================
@@ -222,13 +169,14 @@ public class Inventory : MonoBehaviour, ISaveManager
                 AddToStash(_item);
         }
 
-        UpdateSloatUI();
+        // Phase 3 解耦：数据变化后广播，UI_InventoryPresenter 订阅刷新（不再直接操作槽位）
+        GameEvents.InventoryUpdated();
     }
 
     // ==================== 仓库管理 ====================
     public bool CanAddToStash()
     {
-        if (stash.Count >= stashItemSlot.Length)
+        if (stash.Count >= stashCapacity)
         {
             Debug.Log("Stash is full");
             return false;
@@ -265,7 +213,7 @@ public class Inventory : MonoBehaviour, ISaveManager
 
     public bool CanAddItem()
     {
-        if (inventory.Count >= inventoryItemSlot.Length)
+        if (inventory.Count >= inventoryCapacity)
         {
             Debug.Log("Inventory is full");
             return false;
@@ -299,7 +247,7 @@ public class Inventory : MonoBehaviour, ISaveManager
             else
                 stashValue.RemoveStack();
         }
-        UpdateSloatUI();
+        GameEvents.InventoryUpdated();
     }
 
     // ==================== 合成系统 ====================

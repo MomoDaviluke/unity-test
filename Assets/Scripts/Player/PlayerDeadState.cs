@@ -25,11 +25,9 @@ public class PlayerDeadState : PlayerState
     public override void Enter()
     {
         base.Enter();
-        // 修复 B9：改用 UI 单例，不再 GameObject.Find("Canvas")（Canvas 改名即崩、运行时查找昂贵）
-        if (UI.instance != null)
-            UI.instance.SwitchOnEndScreen();
-        else
-            Debug.LogError("[PlayerDeadState] UI.instance 为空，无法显示结束画面");
+        // Phase 3 解耦（B9 最终形态）：死亡经事件总线广播，UI 订阅显示结束画面；
+        // Player 状态层不再直接引用 UI（依赖方向：逻辑层 → 总线 ← 表现层）
+        GameEvents.PlayerDead();
     }
 
     public override void Exit()
