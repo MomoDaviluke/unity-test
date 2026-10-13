@@ -4,40 +4,48 @@ using UnityEngine;
 using UnityEngine.UI;
 
 
-public class Crystal_Skill : Skill   //放在技能控制器里面
+/// <summary>
+/// Crystal_Skill（水晶技能）- 继承自Skill
+/// 功能：创建水晶进行位置互换、爆炸、追踪敌人，支持多重堆栈
+/// </summary>
+public class Crystal_Skill : Skill
 {
+    // ==================== 水晶基础参数 ====================
     [SerializeField] private float crystalDuration;
     [SerializeField] private GameObject crystalPrefab;
-    private GameObject currentCrystal;//预制件创建得临时水晶
+    private GameObject currentCrystal; // 当前活跃的水晶实例
 
+    // ==================== 水晶解锁 ====================
     [Header("Crystal simple")]
-    [SerializeField] private UI_SKillTreeSlot unlockCrystalButton;//解锁水晶按钮
+    [SerializeField] private UI_SKillTreeSlot unlockCrystalButton;
     public bool crystalUnlocked { get; private set; }
 
+    // ==================== 水晶幻影 ====================
     [Header("Crystal mirage")]
     [SerializeField] private UI_SKillTreeSlot unlockCloneInsteadButton;
-    [SerializeField] private bool cloneInsteadOfCrystal;//克隆代替水晶
+    [SerializeField] private bool cloneInsteadOfCrystal; // 克隆代替水晶
 
-
+    // ==================== 爆炸水晶 ====================
     [Header("Explosive crystal")]
-    [SerializeField] private UI_SKillTreeSlot unlockExplosiveButton;//解锁爆炸水晶按钮
+    [SerializeField] private UI_SKillTreeSlot unlockExplosiveButton;
     [SerializeField] private bool canExplode;
 
+    // ==================== 移动水晶 ====================
     [Header("Moving crystal")]
-    [SerializeField] private UI_SKillTreeSlot unlockMovingCrystalButton;//解锁移动水晶按钮
+    [SerializeField] private UI_SKillTreeSlot unlockMovingCrystalButton;
     [SerializeField] private bool canMoveToEnemy;
     [SerializeField] private float moveSpeed;
 
-
-    [Header("Multi stacking crystal")]//水晶堆栈
-    [SerializeField] private UI_SKillTreeSlot unlockMultiStackButton;//解锁多重水晶按钮
+    // ==================== 多重堆栈水晶 ====================
+    [Header("Multi stacking crystal")]
+    [SerializeField] private UI_SKillTreeSlot unlockMultiStackButton;
     [SerializeField] private bool canUseMultiStacks;
     [SerializeField] private int amountOfStacks;
     [SerializeField] private float multiStackCooldown;
     [SerializeField] private float useTimerWindow;
-    [SerializeField] private List<GameObject> crystalLeft = new List<GameObject>(); //堆栈使用的列表
+    [SerializeField] private List<GameObject> crystalLeft = new List<GameObject>(); // 堆栈列表
 
-
+    // ==================== 初始化与解锁 ====================
     protected override void Start()
     {
         base.Start();
@@ -47,9 +55,7 @@ public class Crystal_Skill : Skill   //放在技能控制器里面
         unlockExplosiveButton.GetComponent<Button>().onClick.AddListener(UnlockExplosiveCrystal);
         unlockMovingCrystalButton.GetComponent<Button>().onClick.AddListener(UnlockMovingCrystal);
         unlockMultiStackButton.GetComponent<Button>().onClick.AddListener(UnlockMultiStackCrystal);
-
     }
-
 
     #region Unlock skill region
     protected override void CheckUnlock()
@@ -60,6 +66,7 @@ public class Crystal_Skill : Skill   //放在技能控制器里面
         UnlockMovingCrystal();
         UnlockMultiStackCrystal();
     }
+
     private void UnlockCrystal()
     {
         if (unlockCrystalButton.unlocked)
@@ -72,13 +79,11 @@ public class Crystal_Skill : Skill   //放在技能控制器里面
             cloneInsteadOfCrystal = true;
     }
 
-
     private void UnlockExplosiveCrystal()
     {
         if (unlockExplosiveButton.unlocked)
             canExplode = true;
     }
-
 
     private void UnlockMovingCrystal()
     {
@@ -93,37 +98,42 @@ public class Crystal_Skill : Skill   //放在技能控制器里面
     }
     #endregion
 
-
     public override bool CanUseSkill()
     {
         return base.CanUseSkill();
     }
 
 
+    // ==================== 技能使用 ====================
+    // 水晶技能逻辑：
+    //   1. 优先使用多重堆栈
+    //   2. 无水晶时创建新水晶
+    //   3. 有水晶时与水晶位置互换（飞雷神之术）
     public override void UseSkill()
     {
         base.UseSkill();
 
-
         if (CanUseMultiStack())
             return;
 
-
-        if (currentCrystal == null)//如果没有水晶
+        // 没有水晶时创建新水晶
+        if (currentCrystal == null)
         {
             CreateCrystal();
         }
         else
         {
-            if (canMoveToEnemy)//有水晶的情况下，如果可以移动到敌人
+            // 移动水晶正在追踪敌人时不能互换
+            if (canMoveToEnemy)
                 return;
 
-            Vector2 playerPos = player.transform.position;//先保存玩家位置
-            player.transform.position = currentCrystal.transform.position;//飞雷神之术
-            currentCrystal.transform.position = playerPos;//位置互换
+            // 保存玩家位置，与水晶位置互换
+            Vector2 playerPos = player.transform.position;
+            player.transform.position = currentCrystal.transform.position;
+            currentCrystal.transform.position = playerPos;
 
-
-            if (cloneInsteadOfCrystal)//如果是克隆代替水晶
+            // 克隆代替水晶：创建分身后销毁水晶
+            if (cloneInsteadOfCrystal)
             {
                 SkillManager.instance.clone.CreateClone(currentCrystal.transform, new Vector3(0, .15f, 0));
                 Destroy(currentCrystal);
@@ -135,64 +145,58 @@ public class Crystal_Skill : Skill   //放在技能控制器里面
         }
     }
 
+    // ==================== 水晶创建 ====================
+    // 在玩家位置创建水晶并设置参数
     public void CreateCrystal()
     {
-        currentCrystal = Instantiate(crystalPrefab, player.transform.position, Quaternion.identity);//运行技能如果水晶没有那就创建一个
-
-        Crystal_Skill_Controller currentCysalScrit = currentCrystal.GetComponent<Crystal_Skill_Controller>();//获得控制器中的组件
-
-        currentCysalScrit.SetupCrystal(crystalDuration, canExplode, canMoveToEnemy, moveSpeed, FindClosestEnemy(currentCrystal.transform), player);//设置水晶函数
-
-        //currentCysalScrit.ChooseRandomEnemy();
-
+        currentCrystal = Instantiate(crystalPrefab, player.transform.position, Quaternion.identity);
+        Crystal_Skill_Controller currentCrystalScript = currentCrystal.GetComponent<Crystal_Skill_Controller>();
+        currentCrystalScript.SetupCrystal(crystalDuration, canExplode, canMoveToEnemy, moveSpeed, FindClosestEnemy(currentCrystal.transform), player);
     }
 
-
+    // 为当前水晶随机选择目标
     public void CurrentCrystalChooseRandomTarget() => currentCrystal.GetComponent<Crystal_Skill_Controller>().ChooseRandomEnemy();
 
-
-
-    private bool CanUseMultiStack()//是否可以使用多个水晶
+    // ==================== 多重堆栈系统 ====================
+    // 使用堆栈中的水晶，用完进入冷却
+    private bool CanUseMultiStack()
     {
         if (canUseMultiStacks)
         {
             if (crystalLeft.Count > 0 && cooldownTimer < 0)
             {
+                // 首次使用堆栈时启动计时窗口
                 if (crystalLeft.Count == amountOfStacks)
                 {
                     Invoke("ResetAbility", useTimerWindow);
                 }
 
                 cooldown = 0;
-                GameObject crystalToSpawn = crystalLeft[crystalLeft.Count - 1];//在列表中找到最后一个水晶
-                GameObject newCrystal = Instantiate(crystalToSpawn, player.transform.position, Quaternion.identity);//创建一个新的水晶
-
+                // 取出最后一个水晶并创建
+                GameObject crystalToSpawn = crystalLeft[crystalLeft.Count - 1];
+                GameObject newCrystal = Instantiate(crystalToSpawn, player.transform.position, Quaternion.identity);
                 crystalLeft.Remove(crystalToSpawn);
 
                 newCrystal.GetComponent<Crystal_Skill_Controller>().
-                    SetupCrystal(crystalDuration, canExplode, canMoveToEnemy, moveSpeed, FindClosestEnemy(newCrystal.transform), player);//调用放置函数
+                    SetupCrystal(crystalDuration, canExplode, canMoveToEnemy, moveSpeed, FindClosestEnemy(newCrystal.transform), player);
 
+                // 堆栈用完，进入冷却并补充
                 if (crystalLeft.Count <= 0)
                 {
                     cooldown = multiStackCooldown;
-
                     RefilCrystal();
                 }
-
                 return true;
-
             }
         }
-
         return false;
     }
 
-
-    private void RefilCrystal()//重新填充水晶函数
+    // 重新填充水晶堆栈
+    private void RefilCrystal()
     {
         int amountToAdd = amountOfStacks - crystalLeft.Count;
-
-        for (int i = 0; i < amountToAdd; i++)//总是补充到3个
+        for (int i = 0; i < amountToAdd; i++)
         {
             crystalLeft.Add(crystalPrefab);
         }

@@ -2,59 +2,69 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-// 控制黑洞技能的类
+/// <summary>
+/// Blackhole_skill_controller（黑洞技能控制器）- 控制黑洞技能的完整行为
+/// 功能：黑洞生长、敌人冻结、热键创建、分身攻击、黑洞收缩
+/// </summary>
 public class Blackhole_skill_controller : MonoBehaviour
 {
+    // ==================== 热键系统 ====================
     [SerializeField] private GameObject hotKeyPrefab;
     [SerializeField] private List<KeyCode> keyCodeList;
 
+    // ==================== 黑洞参数 ====================
     private float maxSize;
     private float growSpeed;
     private float shrinkSpeed;
     private float blackholeTimer;
 
+    // ==================== 状态标志 ====================
     private bool canGrow = true;
     private bool canShrink;
     private bool canCreateHotKeys = true;
     private bool cloneAttackReleased;
     private bool playerCanDisaper = true;
 
+    // ==================== 分身攻击参数 ====================
     private int amountOfAttacks = 4;
     private float cloneAttackCooldown = .3f;
     private float cloneAttackTimer;
 
+    // ==================== 目标管理 ====================
     private List<Transform> targets = new List<Transform>();
     private List<GameObject> createdHotKey = new List<GameObject>();
-
     public bool playerCanExitState { get; private set; }
 
-    // 设置黑洞技能的参数
+    // ==================== 初始化 ====================
+    // 设置黑洞大小、生长/收缩速度、攻击次数、持续时间等
     public void SetupBlackhole(float _maxSize, float _growSpeed, float _shrinkSpeed, int _amountOfAttacks, float _cloneAttackCooldown, float _blackholeDuration)
     {
         maxSize = _maxSize;
         growSpeed = _growSpeed;
         shrinkSpeed = _shrinkSpeed;
-        // 确保攻击次数至少为1
         amountOfAttacks = Mathf.Max(1, _amountOfAttacks);
         cloneAttackCooldown = _cloneAttackCooldown;
-
         blackholeTimer = _blackholeDuration;
 
+        // 水晶替代分身时玩家不消失
         if (SkillManager.instance.clone.crystalInsteadOfClone)
             playerCanDisaper = false;
     }
 
+    // ==================== 生命周期 ====================
+    // 黑洞生长、R键触发分身攻击、时间到自动释放
     private void Update()
     {
         cloneAttackTimer -= Time.deltaTime;
         blackholeTimer -= Time.deltaTime;
 
-        // 简化R键检测逻辑
+        // 按R键提前释放分身攻击
         if (Input.GetKeyDown(KeyCode.R) && targets.Count > 0 && !cloneAttackReleased)
         {
             ReleaseCloneAttack();
         }
 
+        // 黑洞时间到，自动释放攻击或结束
         if (blackholeTimer < 0)
         {
             blackholeTimer = Mathf.Infinity;
@@ -66,10 +76,12 @@ public class Blackhole_skill_controller : MonoBehaviour
 
         CloneAttackLogic();
 
+        // 黑洞生长
         if (canGrow && !canShrink)
         {
             transform.localScale = Vector2.Lerp(transform.localScale, new Vector2(maxSize, maxSize), growSpeed * Time.deltaTime);
         }
+        // 黑洞收缩
         if (canShrink)
         {
             transform.localScale = Vector2.Lerp(transform.localScale, new Vector2(-1, -1), shrinkSpeed * Time.deltaTime);
@@ -78,27 +90,30 @@ public class Blackhole_skill_controller : MonoBehaviour
         }
     }
 
+    // ==================== 分身攻击释放 ====================
+    // 玩家按下R键或时间到时触发，开始分身攻击
     private void ReleaseCloneAttack()
     {
-        if (targets.Count <= 0) return;  // 添加保护检查
+        if (targets.Count <= 0) return;
 
         cloneAttackReleased = true;
         canCreateHotKeys = false;
         DestroyHotKeys();
 
+        // 让玩家隐身
         if (playerCanDisaper)
         {
             playerCanDisaper = false;
             PlayerManager.instance.player.fX.MakeTransprent(true);
         }
 
-        // 初始化克隆攻击计时器
         cloneAttackTimer = cloneAttackCooldown;
     }
 
+    // ==================== 分身攻击逻辑 ====================
+    // 按冷却时间对随机目标创建分身/水晶攻击
     private void CloneAttackLogic()
     {
-
         if (cloneAttackTimer < 0 && cloneAttackReleased && amountOfAttacks > 0 && targets.Count > 0)
         {
             cloneAttackTimer = cloneAttackCooldown;
@@ -110,6 +125,7 @@ public class Blackhole_skill_controller : MonoBehaviour
             {
                 float xOffset = Random.Range(0, 100) > 50 ? 2 : -2;
 
+                // 水晶替代分身
                 if (SkillManager.instance.clone.crystalInsteadOfClone)
                 {
                     SkillManager.instance.crystal.CreateCrystal();
@@ -128,12 +144,13 @@ public class Blackhole_skill_controller : MonoBehaviour
             }
             else
             {
-                // 如果目标无效，从列表中移除
                 targets.RemoveAt(randomIndex);
             }
         }
     }
 
+    // ==================== 黑洞结束 ====================
+    // 销毁热键、恢复玩家、开始收缩
     private void FinishBlackHoleAbility()
     {
         DestroyHotKeys();
@@ -141,7 +158,7 @@ public class Blackhole_skill_controller : MonoBehaviour
         canShrink = true;
         cloneAttackReleased = false;
 
-        // 恢复玩家状态
+        // 恢复玩家可见
         if (!playerCanDisaper)
         {
             playerCanDisaper = true;
@@ -162,7 +179,8 @@ public class Blackhole_skill_controller : MonoBehaviour
         }
     }
 
-    // 当物体进入2D碰撞器时的处理
+    // ==================== 碰撞检测 ====================
+    // 敌人进入黑洞范围时冻结并创建热键
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.GetComponent<Enemy>() != null)
@@ -172,51 +190,43 @@ public class Blackhole_skill_controller : MonoBehaviour
         }
     }
 
-    // 将敌人添加到目标列表中
+    // 将敌人添加到目标列表
     public void AddEnemyToList(Transform _myEnemy)
     {
         targets.Add(_myEnemy);
     }
 
-
-    // 当物体离开2D碰撞器时的处理
+    // 敌人离开黑洞范围时解除冻结
     private void OnTriggerExit2D(Collider2D collision)
     {
         if (collision.GetComponent<Enemy>() != null)
         {
             collision.GetComponent<Enemy>().FreezeTime(false);
-
         }
     }
 
-    // 创建热键
+    // ==================== 热键创建 ====================
+    // 在敌人头顶创建随机热键提示
     private void CreateHotKey(Collider2D collision)
     {
-        if (keyCodeList.Count == 0)//当所有的KeyCode都被去除，就不在创建实例
+        if (keyCodeList.Count == 0)
         {
             return;
         }
 
-        if (!canCreateHotKeys)//这是当角色已经开大了，不在创建实例
+        if (!canCreateHotKeys)
         {
             return;
         }
 
-        //创建实例
         GameObject newHotKey = Instantiate(hotKeyPrefab, collision.transform.position + new Vector3(0, 2), Quaternion.identity);
-
-        //将实例添加进列表
         createdHotKey.Add(newHotKey);
 
-
-        //随机KeyCode传给HotKey，并且传过去一个毁掉一个
+        // 随机分配一个KeyCode并移除
         KeyCode choosenKey = keyCodeList[Random.Range(0, keyCodeList.Count)];
-
         keyCodeList.Remove(choosenKey);
 
         Blackhole_HotKey_Controller newHotKeyScript = newHotKey.GetComponent<Blackhole_HotKey_Controller>();
-
         newHotKeyScript.SetupHotKey(choosenKey, collision.transform, this);
     }
-
 }

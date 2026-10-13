@@ -3,23 +3,31 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// Parry_Skill（反击技能）- 继承自Skill
+/// 功能：反击姿态，成功反击时恢复生命并创建幻影分身
+/// </summary>
 public class Parry_SKill : Skill
 {
-    [Header("反击")]//parry
+    // ==================== 反击解锁 ====================
+    [Header("反击")]
     [SerializeField] private UI_SKillTreeSlot parryUnlockButton;
     public bool parryUnlocked { get; private set; }
 
-    [Header("反击恢复")]//Parry restor
+    // ==================== 反击恢复 ====================
+    [Header("反击恢复")]
     [SerializeField] private UI_SKillTreeSlot restorUnlockButton;
     [Range(0f, 1f)]
     [SerializeField] private float restoreHealthPercentage;
     public bool restorUnlocked { get; private set; }
 
-    [Header("格挡幻影")]//Parry mirrage
+    // ==================== 格挡幻影 ====================
+    [Header("格挡幻影")]
     [SerializeField] private UI_SKillTreeSlot parrtWithMirageUnlockButton;
     public bool parrtWithMirageUnlocked { get; private set; }
 
-
+    // ==================== 技能使用 ====================
+    // 成功反击时恢复生命值
     public override void UseSkill()
     {
         base.UseSkill();
@@ -28,11 +36,10 @@ public class Parry_SKill : Skill
         {
             int restoreAmount = Mathf.RoundToInt(player.stats.GetMaxHealthValue() * restoreHealthPercentage);
             player.stats.IncreaseHealthBy(restoreAmount);
-
         }
     }
 
-
+    // ==================== 初始化与解锁 ====================
     protected override void Start()
     {
         base.Start();
@@ -41,13 +48,13 @@ public class Parry_SKill : Skill
         restorUnlockButton.GetComponent<Button>().onClick.AddListener(UnlockParryRestor);
         parrtWithMirageUnlockButton.GetComponent<Button>().onClick.AddListener(UnlockParrtWithMirage);
     }
+
     protected override void CheckUnlock()
     {
         UnlockParry();
         UnlockParryRestor();
         UnlockParrtWithMirage();
     }
-
 
     private void UnlockParry()
     {
@@ -67,7 +74,8 @@ public class Parry_SKill : Skill
             parrtWithMirageUnlocked = true;
     }
 
-
+    // ==================== 幻影创建接口 ====================
+    // 成功反击时在敌人位置创建幻影分身
     public void MakeMirageOnParry(Transform _respawnTransform)
     {
         if (parrtWithMirageUnlocked)
