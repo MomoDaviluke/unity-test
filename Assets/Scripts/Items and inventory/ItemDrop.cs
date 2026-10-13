@@ -14,7 +14,11 @@ public class ItemDrop : MonoBehaviour
     private List<ItemData> dropList;                    // 实际掉落列表
     [SerializeField] private GameObject dropPrefab;     // 掉落物预制体
 
-    private bool hasDropped = false; // 是否已掉落：防止重复掉落
+    // 修复 B2：移除 hasDropped 标志。
+    // 原设计意图是"防止重复掉落"，但调用方 EnemyStats.Die()/PlayerStats.Die()
+    // 已通过 isDead 保证每次死亡只调用一次 GenerateDrop，该标志完全冗余；
+    // 更严重的是 DropItem 内的检查会把同一次 GenerateDrop 的多件掉落截断为 1 件
+    // （敌人多物品配置、玩家死亡掉装备+材料均被错误拦截）。
 
     /// <summary>
     /// 生成掉落：根据概率选择物品并创建掉落实例
@@ -50,16 +54,11 @@ public class ItemDrop : MonoBehaviour
     /// <param name="_itemData">要掉落的物品数据</param>
     protected void DropItem(ItemData _itemData)
     {
-        if (hasDropped)
-            return;
-
         if (dropPrefab == null)
         {
             Debug.LogError($"[{gameObject.name}] 的 dropPrefab 未设置！无法生成掉落物品。");
             return;
         }
-
-        hasDropped = true;
 
         // 创建掉落物实例
         GameObject newDrop = Instantiate(dropPrefab, transform.position, Quaternion.identity);

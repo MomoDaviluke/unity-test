@@ -29,6 +29,11 @@
 # IDE tool cache (Cursor hooks state)
 .cursor/
 
+# Unity batchmode test artifacts
+test_results.xml
+test_run.log
+compile_check.log
+
 # Gradle cache directory
 .gradle/
 
