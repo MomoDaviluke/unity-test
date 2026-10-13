@@ -4,45 +4,52 @@ using UnityEngine;
 
 public class SlimeStunState : EnemyState
 {
-    private Enemy_Slime enemy; // 史莱姆敌人引用
+    // ==================== 核心引用 ====================
+    private Enemy_Slime enemy;
 
-    // 构造函数：初始化状态
+    // ==================== 构造函数 ====================
     public SlimeStunState(Enemy _enemyBase, EnemyStateMachine _stateMachine, string _animBoolName, Enemy_Slime enemy) : base(_enemyBase, _stateMachine, _animBoolName)
     {
         this.enemy = enemy;
     }
 
-    // 进入眩晕状态
+    // ==================== 状态生命周期 ====================
+    // Enter时启动红色闪烁，设置眩晕时间，施加击退力
+    // Update中落地后触发眩晕动画并设置无敌
+    // Exit时取消无敌状态
+
     public override void Enter()
     {
         base.Enter();
 
-        enemy.fX.InvokeRepeating("RedColorBlink", 0, .1f); // 启动红色闪烁效果
+        // 启动红色闪烁视觉反馈
+        enemy.fX.InvokeRepeating("RedColorBlink", 0, .1f);
 
-        stateTimer = enemy.stunDuration; // 设置眩晕持续时间
+        stateTimer = enemy.stunDuration;
 
-        // 设置眩晕击退的速度和方向
+        // 施加击退力
         rb.velocity = new Vector2(-enemy.facingDir * enemy.stunDirection.x, enemy.stunDirection.y);
     }
 
-    // 退出眩晕状态
     public override void Exit()
     {
         base.Exit();
 
-        enemy.stats.MakeInvincible(false); // 取消无敌状态
+        enemy.stats.MakeInvincible(false);
     }
 
-    // 眩晕状态更新
     public override void Update()
     {
         base.Update();
+
+        // 落地后触发眩晕动画并设置无敌
         if (rb.velocity.y < .1f && enemy.IsGroundDetected())
         {
-            enemy.fX.Invoke("CancelColorChange", 0); // 取消颜色变化效果
+            enemy.fX.Invoke("CancelColorChange", 0);
             enemy.anim.SetTrigger("Stun");
             enemy.stats.MakeInvincible(true);
         }
+
         // 眩晕时间结束后返回空闲状态
         if (stateTimer < 0)
             stateMachine.ChangeState(enemy.idleState);

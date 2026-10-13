@@ -4,21 +4,25 @@ using UnityEngine;
 
 public class SlimeGroundedState : EnemyState
 {
-    protected Enemy_Slime enemy; // 史莱姆敌人引用
-    protected Transform player; // 玩家位置引用
+    // ==================== 核心引用 ====================
+    protected Enemy_Slime enemy;
+    protected Transform player;
 
-    // 构造函数：初始化地面状态
+    // ==================== 构造函数 ====================
     public SlimeGroundedState(Enemy _enemyBase, EnemyStateMachine _stateMachine, string _animBoolName, Enemy_Slime _enemy) : base(_enemyBase, _stateMachine, _animBoolName)
     {
         enemy = _enemy;
     }
 
-    // 进入地面状态
+    // ==================== 状态生命周期 ====================
+    // Enter时缓存玩家引用
+    // Update中检测玩家（射线检测或距离<2.5），发现则切换到战斗状态
+
     public override void Enter()
     {
         base.Enter();
 
-        player = PlayerManager.instance.player.transform; // 获取玩家位置引用
+        player = PlayerManager.instance.player.transform;
     }
 
     public override void Exit()
@@ -26,12 +30,10 @@ public class SlimeGroundedState : EnemyState
         base.Exit();
     }
 
-    // 地面状态更新
     public override void Update()
     {
         base.Update();
 
-        // 检测玩家，如发现玩家则切换到战斗状态
         if (enemy.IsPlayerDetected() || Vector2.Distance(enemy.transform.position, player.transform.position) < 2.5)
         {
             stateMachine.ChangeState(enemy.battleState);

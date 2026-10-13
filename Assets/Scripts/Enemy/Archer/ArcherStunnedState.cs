@@ -4,21 +4,30 @@ using UnityEngine;
 
 public class ArcherStunnedState : EnemyState
 {
+    // ==================== 核心引用 ====================
     private Enemy_Archer enemy;
 
+    // ==================== 构造函数 ====================
     public ArcherStunnedState(Enemy _enemyBase, EnemyStateMachine _stateMachine, string _animBoolName, Enemy_Archer enemy) : base(_enemyBase, _stateMachine, _animBoolName)
     {
         this.enemy = enemy;
     }
 
+    // ==================== 状态生命周期 ====================
+    // Enter时启动红色闪烁，设置眩晕时间，施加击退力
+    // Update中计时器归零后返回待机
+    // Exit时取消颜色变化效果
+
     public override void Enter()
     {
         base.Enter();
 
-        enemy.fX.InvokeRepeating("RedColorBlink", 0, .1f); //这行代码使用 InvokeRepeating 方法，每隔 0.1 秒调用一次 RedColorBlink 方法。
+        // 启动红色闪烁视觉反馈（每0.1秒闪烁一次）
+        enemy.fX.InvokeRepeating("RedColorBlink", 0, .1f);
 
         stateTimer = enemy.stunDuration;
 
+        // 施加击退力
         rb.velocity = new Vector2(-enemy.facingDir * enemy.stunDirection.x, enemy.stunDirection.y);
     }
 
@@ -26,7 +35,8 @@ public class ArcherStunnedState : EnemyState
     {
         base.Exit();
 
-        enemy.fX.Invoke("CancelColorChange", 0);//Invoke 方法用于在指定的延迟时间后调用某个方法。在这里，延迟时间为 0
+        // 取消颜色变化效果
+        enemy.fX.Invoke("CancelColorChange", 0);
     }
 
     public override void Update()
@@ -35,6 +45,5 @@ public class ArcherStunnedState : EnemyState
 
         if (stateTimer < 0)
             stateMachine.ChangeState(enemy.idleState);
-
     }
 }

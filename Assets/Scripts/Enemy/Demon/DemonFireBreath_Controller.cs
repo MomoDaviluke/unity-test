@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class DemonFireBreath_Controller : MonoBehaviour
 {
+    // ==================== 核心参数 ====================
     private CharacterStats myStats;
     private float moveSpeed = 12f;
     private float lifeTime = 3f;
@@ -11,6 +12,8 @@ public class DemonFireBreath_Controller : MonoBehaviour
     private float damageInterval = 0.2f;
     private float lastDamageTime;
 
+    // ==================== 初始化 ====================
+    // 设置伤害来源并面朝玩家
     public void SetupSpell(CharacterStats _stats)
     {
         myStats = _stats;
@@ -25,11 +28,15 @@ public class DemonFireBreath_Controller : MonoBehaviour
         Destroy(gameObject, lifeTime);
     }
 
+    // ==================== 移动逻辑 ====================
+    // 沿面朝方向直线飞行
     private void Update()
     {
         transform.Translate(Vector2.right * moveSpeed * direction * Time.deltaTime);
     }
 
+    // ==================== 持续伤害检测 ====================
+    // 玩家停留在火焰范围内时按间隔造成伤害
     private void OnTriggerStay2D(Collider2D collision)
     {
         if (collision.GetComponent<Player>() != null && Time.time >= lastDamageTime + damageInterval)

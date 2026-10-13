@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class DemonSpell_Controller : MonoBehaviour
 {
+    // ==================== 核心参数 ====================
     private CharacterStats myStats;
     private float moveSpeed = 3f;
     private float lifeTime = 5f;
@@ -12,8 +13,11 @@ public class DemonSpell_Controller : MonoBehaviour
     private bool hasExploded = false;
     private bool isHoming = false;
     private Transform playerTransform;
-    private float damageMultiplier = 0.3f; // 伤害倍率
+    private float damageMultiplier = 0.3f; // 伤害倍率（降低为30%）
 
+    // ==================== 初始化 ====================
+    // 设置法术属性：伤害来源、是否跟踪
+    // 非跟踪模式时根据玩家位置设置初始方向
     public void SetupSpell(CharacterStats _stats, bool _isHoming = false)
     {
         myStats = _stats;
@@ -31,25 +35,27 @@ public class DemonSpell_Controller : MonoBehaviour
         Destroy(gameObject, lifeTime);
     }
 
+    // ==================== 移动逻辑 ====================
+    // 跟踪模式：朝向玩家移动
+    // 直线模式：沿初始方向直线飞行
     private void Update()
     {
         if (isHoming && playerTransform != null)
         {
-            // 跟踪玩家
             Vector3 directionToPlayer = (playerTransform.position - transform.position).normalized;
             transform.position += directionToPlayer * moveSpeed * Time.deltaTime;
             
-            // 朝向玩家
             direction = playerTransform.position.x > transform.position.x ? 1 : -1;
             transform.localScale = new Vector3(direction, 1, 1);
         }
         else
         {
-            // 直线飞行
             transform.Translate(Vector2.right * moveSpeed * direction * Time.deltaTime);
         }
     }
 
+    // ==================== 碰撞检测 ====================
+    // 碰到玩家时触发爆炸
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.GetComponent<Player>() != null && !hasExploded)
@@ -58,6 +64,8 @@ public class DemonSpell_Controller : MonoBehaviour
         }
     }
 
+    // ==================== 爆炸处理 ====================
+    // 对玩家造成30%基础伤害，播放爆炸动画，0.5秒后销毁
     public void Explode()
     {
         if (hasExploded) return;
@@ -66,7 +74,6 @@ public class DemonSpell_Controller : MonoBehaviour
         Player player = PlayerManager.instance.player;
         if (player != null)
         {
-            // 获取基础伤害并降低到30%
             int baseDamage = myStats.damage.GetValue();
             int reducedDamage = Mathf.RoundToInt(baseDamage * damageMultiplier);
             player.GetComponent<CharacterStats>()?.TakeDamage(reducedDamage);

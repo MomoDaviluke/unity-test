@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class Enemy_Demon : Enemy
 {
+    // ==================== 状态机声明 ====================
+    // Demon拥有9个状态：待机、行走、受击、劈砍、踩踏、施法、喷火、瞬移、死亡
     #region States
     public DemonIdleState idleState { get; private set; }
     public DemonWalkState walkState { get; private set; }
@@ -16,24 +18,29 @@ public class Enemy_Demon : Enemy
     public DemonDeadState deadState { get; private set; }
     #endregion
 
+    // ==================== Boss基础设置 ====================
     [Header("Boss设置")]
     public bool bossFightBegun;
-    public int formLevel = 1;  // 形态等级
+    public int formLevel = 1;
 
+    // ==================== 移动参数 ====================
     [Header("移动设置")]
     public float chaseSpeed = 4f;
-    public float stopDistance = 3f;  // 追击速度
+    public float stopDistance = 3f;
 
+    // ==================== 技能冷却管理 ====================
     [Header("技能冷却")]
     public float skillCooldown = 0.3f;
     public float lastTimeSkillUsed;
 
+    // ==================== 瞬移参数 ====================
     [Header("瞬移设置")]
     public float teleportCooldown = 5f;
     public float lastTimeTeleported;
     public float teleportRange = 8f;
     [SerializeField] private BoxCollider2D arena;
 
+    // ==================== 魔法与喷火技能 ====================
     [Header("魔法技能")]
     [SerializeField] private GameObject spellPrefab;
     [SerializeField] private GameObject fireBreathPrefab;
@@ -41,6 +48,7 @@ public class Enemy_Demon : Enemy
     public float spellCastCooldown = 4f;
     public float lastTimeSpellCast;
 
+    // ==================== 范围技能参数 ====================
     [Header("踩踏技能")]
     public float smashRadius = 5f;
     public float smashDamage = 30f;
@@ -49,6 +57,7 @@ public class Enemy_Demon : Enemy
     public float cleaveDamage = 25f;
     public float cleaveRange = 3f;
 
+    // ==================== 特效预制体 ====================
     [Header("特效")]
     public GameObject teleportEffect;
     public GameObject castSpellEffect;
@@ -57,6 +66,10 @@ public class Enemy_Demon : Enemy
     private GameObject currentTeleportEffectInstance;
     private GameObject currentCastSpellEffectInstance;
     private GameObject currentSmashGroundEffectInstance;
+
+    // ==================== 生命周期 ====================
+    // Awake中创建所有状态实例
+    // Start时初始化面朝方向、隐藏反击图片、订阅受击事件
 
     protected override void Awake()
     {
@@ -77,20 +90,19 @@ public class Enemy_Demon : Enemy
     {
         base.Start();
         
-        // 隐藏反击图片
         counterImage?.SetActive(false);
 
         SetupDefaultFacingDir(1);
         stateMachine.Initialize(idleState);
         
-        // 订阅受击回调
+        // 订阅受击回调：非技能释放状态下受击会切换到受击状态
         stats.GetComponent<EnemyStats>().onTakeDamage += OnTakeDamage;
     }
     
-    // 受击回调
+    // ==================== 受击处理 ====================
+    // 受击回调：如果当前不在受击、死亡或技能释放状态，则被打断进入受击状态
     private void OnTakeDamage()
     {
-        // 如果不是在受击状态或死亡状态，可以被打断
         if (stateMachine.currentState != takeHitState && 
             stateMachine.currentState != deadState &&
             stateMachine.currentState != cleaveState &&
@@ -101,6 +113,8 @@ public class Enemy_Demon : Enemy
         }
     }
 
+    // ==================== 死亡处理 ====================
+    // 显示所有背景对象并切换到死亡状态
     public override void Die()
     {
         base.Die();
@@ -109,6 +123,8 @@ public class Enemy_Demon : Enemy
         stateMachine.ChangeState(deadState);
     }
 
+    // ==================== 背景对象管理 ====================
+    // Boss死亡后显示所有名为"Bg_BG"的背景对象
     private void ShowAllBgBgObjects()
     {
         GameObject[] allGameObjects = Resources.FindObjectsOfTypeAll<GameObject>();
@@ -128,10 +144,10 @@ public class Enemy_Demon : Enemy
         }
     }
 
-    // 选择下一个技能 - 随机概率
+    // ==================== 技能选择系统 ====================
+    // 随机选择下一个技能（各20%概率）：踩踏、劈砍、瞬移、喷火、施法
     public void SelectNextSkill()
     {
-        // 设置技能冷却时间
         lastTimeSkillUsed = Time.time;
 
         float random = Random.Range(0, 100);
@@ -143,13 +159,13 @@ public class Enemy_Demon : Enemy
             Debug.Log("[SelectNextSkill] Smash");
             stateMachine.ChangeState(smashState);
         }
-        // 20% 打击
+        // 20% 劈砍
         else if (random < 40)
         {
             Debug.Log("[SelectNextSkill] Cleave");
             stateMachine.ChangeState(cleaveState);
         }
-        // 20% 瞬移 - 直接执行
+        // 20% 瞬移
         else if (random < 60)
         {
             Debug.Log("[SelectNextSkill] Teleport");
@@ -171,22 +187,21 @@ public class Enemy_Demon : Enemy
         }
     }
 
-    // 判断是否能施放魔法
+    // ==================== 冷却判定 ====================
     public bool CanCastSpell()
     {
         return Time.time >= lastTimeSpellCast + spellCastCooldown;
     }
 
-    // 判断是否能瞬移
     public bool CanTeleport()
     {
         return Time.time >= lastTimeTeleported + teleportCooldown;
     }
 
-    // 施放魔法技能 - 分批发射多颗跟踪子弹
+    // ==================== 施法技能 ====================
+    // 分批发射多颗跟踪子弹，带有冷却检查
     public void CastSpell()
     {
-        // 冷却中则不释放（首次不检查）
         if (lastTimeSpellCast > 0 && Time.time < lastTimeSpellCast + spellCastCooldown)
         {
             Debug.Log("[CastSpell] Cooldown, lastTime: " + lastTimeSpellCast + ", cooldown: " + spellCastCooldown);
@@ -206,6 +221,8 @@ public class Enemy_Demon : Enemy
         StartCoroutine(SpawnBulletsInWaves());
     }
 
+    // ==================== 魔法子弹协程 ====================
+    // 分波次发射跟踪子弹，每波之间有延迟
     private System.Collections.IEnumerator SpawnBulletsInWaves()
     {
         int totalBullets = 4;
@@ -246,7 +263,7 @@ public class Enemy_Demon : Enemy
         }
     }
 
-    // 喷火技能
+    // ==================== 喷火技能 ====================
     public void CastFireBreath()
     {
         lastTimeSpellCast = Time.time;
@@ -258,7 +275,8 @@ public class Enemy_Demon : Enemy
         }
     }
 
-    // 瞬移到玩家身后
+    // ==================== 瞬移技能 ====================
+    // 瞬移到玩家身后（相对位置偏移3个单位）
     public void Teleport()
     {
         lastTimeTeleported = Time.time;
@@ -277,7 +295,8 @@ public class Enemy_Demon : Enemy
         PlayTeleportEffect(transform.position);
     }
 
-    // 查找安全的瞬移位置
+    // ==================== 安全位置瞬移 ====================
+    // 在竞技场范围内随机选择安全位置瞬移
     public void FindSafeTeleportPosition()
     {
         if (arena == null)
@@ -289,15 +308,15 @@ public class Enemy_Demon : Enemy
         float x = Random.Range(arena.bounds.min.x + 2, arena.bounds.max.x - 2);
         float y = Random.Range(arena.bounds.min.y + 2, arena.bounds.max.y - 2);
 
-        // 生成特效
         PlayTeleportEffect(transform.position);
 
         transform.position = new Vector3(x, y, 0);
 
-        // 生成落地特效
         PlayTeleportEffect(transform.position);
     }
 
+    // ==================== 特效播放 ====================
+    // 统一特效生成方法：先销毁旧特效再生成新特效，避免重复堆积
     public void PlayTeleportEffect(Vector3 position)
     {
         SpawnSingleEffect(teleportEffect, position, ref currentTeleportEffectInstance);
@@ -326,34 +345,34 @@ public class Enemy_Demon : Enemy
         currentEffectInstance = Instantiate(effectPrefab, position, Quaternion.identity);
     }
 
-    // 受击动画结束
+    // ==================== 状态结束回调 ====================
     public void TakeHitFinished()
     {
         stateMachine.ChangeState(walkState);
     }
 
-    // 技能动画结束
     public void SkillFinished()
     {
         stateMachine.ChangeState(walkState);
     }
 
-    // 检测玩家距离 - 水平距离
+    // ==================== 距离计算 ====================
+    // 计算与玩家的水平距离
     public float GetPlayerDistance()
     {
         Player player = PlayerManager.instance.player;
         if (player == null) return float.MaxValue;
         
-        // 使用水平距离，更可靠
         return Mathf.Abs(transform.position.x - player.transform.position.x);
     }
 
-    // 炫酷特效 - 攻击命中
+    // ==================== 命中特效 ====================
     public void PlayHitEffect(Vector3 position)
     {
         // 可以在这里添加粒子效果、屏幕震动等
     }
 
+    // ==================== Gizmos绘制 ====================
     protected override void OnDrawGizmos()
     {
         base.OnDrawGizmos();

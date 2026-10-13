@@ -9,6 +9,11 @@ public enum SlimeType { big, Medium, small }
 
 public class Enemy_Slime : Enemy
 {
+    // ==================== 史莱姆专属参数 ====================
+    // slimeType: 史莱姆类型（大/中/小），决定死亡时是否分裂
+    // slimesToCreate: 死亡时分裂生成的小史莱姆数量
+    // slimePrefab: 小史莱姆预制体
+    // min/maxCreationVelocity: 分裂时的随机速度范围
     [Header("Slime spesific")]
     [SerializeField] private SlimeType slimeType; // 史莱姆类型
     [SerializeField] private int slimesToCreate; // 死亡时创建的小史莱姆数量
@@ -16,8 +21,9 @@ public class Enemy_Slime : Enemy
     [SerializeField] private Vector2 minCreationVelocity; // 创建史莱姆的最小速度
     [SerializeField] private Vector2 maxCreationVelocity; // 创建史莱姆的最大速度
 
+    // ==================== 状态机声明 ====================
+    // Slime拥有6个状态：待机、移动、战斗、攻击、眩晕、死亡
     #region States
-    // 各种状态引用
     public SlimeIdleState idleState { get; private set; }
     public SlimeMoveState moveState { get; private set; }
     public SlimeBattleState battleState { get; private set; }
@@ -26,13 +32,15 @@ public class Enemy_Slime : Enemy
     public SlimeDeathState deadState { get; private set; }
     #endregion
 
-    // 初始化
+    // ==================== 生命周期 ====================
+    // Awake中创建所有状态，设置初始面朝方向为右（1）
+    // Start时初始化状态机为待机状态
+
     protected override void Awake()
     {
         base.Awake();
         facingDir = 1; // 设置初始朝向为右
 
-        // 初始化所有状态
         idleState = new SlimeIdleState(this, stateMachine, "Idle", this);
         moveState = new SlimeMoveState(this, stateMachine, "Move", this);
         battleState = new SlimeBattleState(this, stateMachine, "Move", this);
@@ -41,25 +49,24 @@ public class Enemy_Slime : Enemy
         deadState = new SlimeDeathState(this, stateMachine, "Dead", this);
     }
 
-    // 开始时设置初始状态
     protected override void Start()
     {
         base.Start();
-        stateMachine.Initialize(idleState); // 初始状态为空闲
+        stateMachine.Initialize(idleState);
     }
 
-    // 更新
+    // ==================== 调试功能 ====================
+    // 按U键强制眩晕（调试用）
     protected override void Update()
     {
         base.Update();
-        // 测试代码：按U键进入眩晕状态
         if (Input.GetKeyDown(KeyCode.U))
         {
             stateMachine.ChangeState(stunnedState);
         }
     }
 
-    // 是否可以被眩晕（重写基类方法）
+    // ==================== 状态切换接口 ====================
     public override bool CanbeStunned()
     {
         if (base.CanbeStunned())
@@ -70,31 +77,35 @@ public class Enemy_Slime : Enemy
         return false;
     }
 
-    // 死亡处理（重写基类方法）
+    // ==================== 死亡处理：分裂机制 ====================
+    // 死亡时切换到死亡状态
+    // 如果不是最小的史莱姆，则分裂生成多个小史莱姆
+    // 小史莱姆继承当前面朝方向并带有随机击退速度
     public override void Die()
     {
         base.Die();
 
-        stateMachine.ChangeState(deadState); // 切换到死亡状态
+        stateMachine.ChangeState(deadState);
 
-        // 如果不是小史莱姆，则分裂出其他的史莱姆
+        // 小史莱姆不再分裂
         if (slimeType == SlimeType.small)
             return;
         CreateSlimes(slimesToCreate, slimePrefab);
     }
 
-    // 创建小史莱姆的方法
+    // ==================== 分裂生成 ====================
+    // 循环生成指定数量的小史莱姆，每个都调用SetupSlime初始化
     private void CreateSlimes(int _amountOfSlimes, GameObject _slimePrefab)
     {
         for (int i = 0; i < _amountOfSlimes; i++)
         {
-            // 实例化新史莱姆并设置初始属性
             GameObject newSlime = Instantiate(_slimePrefab, transform.position, Quaternion.identity);
             newSlime.GetComponent<Enemy_Slime>().SetupSlime(facingDir);
         }
     }
 
-    // 设置新生成史莱姆的属性
+    // ==================== 新史莱姆初始化 ====================
+    // 设置新生成史莱姆的朝向和初始击退速度
     public void SetupSlime(int _facingDir)
     {
         // 如果朝向不同则翻转
