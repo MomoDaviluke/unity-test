@@ -18,13 +18,13 @@ public class SlimeDeathState : EnemyState
         base.Enter();
         rb.velocity = Vector2.zero;
 
+        // 修复 B10：销毁调度只做一次，避免 Update 每帧重复调度。
+        GameObject.Destroy(enemy.gameObject, 2f);
     }
 
     // 死亡状态更新
     public override void Update()
     {
         base.Update();
-
-        GameObject.Destroy(enemy.gameObject, 2f);
     }
 }

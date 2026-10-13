@@ -30,6 +30,10 @@ public class SkeletonDeadState : EnemyState
     {
         base.Enter();
         rb.velocity = Vector2.zero; // 停止所有移动
+
+        // 修复 B10：销毁调度只做一次（Enter 仅执行一次），
+        // 原先放在 Update 中会每帧重复调度 Destroy。
+        GameObject.Destroy(enemy.gameObject, 2f);
     }
 
     public override void Exit()
@@ -43,8 +47,5 @@ public class SkeletonDeadState : EnemyState
     public override void Update()
     {
         base.Update();
-
-        // 2秒后销毁敌人对象（给死亡动画播放时间）
-        GameObject.Destroy(enemy.gameObject, 2f);
     }
 }

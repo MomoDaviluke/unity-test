@@ -23,6 +23,9 @@ public class ArcherDeadState : EnemyState
         base.Enter();
 
         rb.velocity = Vector2.zero;
+
+        // 修复 B10：销毁调度只做一次，避免 Update 每帧重复调度。
+        GameObject.Destroy(enemy.gameObject, 2f);
     }
 
     public override void Exit()
@@ -33,8 +36,5 @@ public class ArcherDeadState : EnemyState
     public override void Update()
     {
         base.Update();
-
-        // 2秒后销毁敌人对象（给死亡动画播放时间）
-        GameObject.Destroy(enemy.gameObject, 2f);
     }
 }
