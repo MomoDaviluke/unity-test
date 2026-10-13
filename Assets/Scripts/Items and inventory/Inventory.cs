@@ -1,8 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
 using UnityEngine;
 
 /// <summary>
@@ -56,6 +53,10 @@ public class Inventory : MonoBehaviour, ISaveManager
     [Header("数据库")]
     public List<InventoryItem> loadedItems;
     public List<ItemData_Equipment> loadedEquipment;
+
+    // 修复 B1：物品数据库（ScriptableObject，显式登记全部物品）。
+    // 编辑器与打包统一使用它解析存档物品，替代原先只在编辑器生效的 AssetDatabase 扫描。
+    [SerializeField] private ItemDatabase itemDatabase;
 
     // ==================== 单例初始化 ====================
     private void Awake()
@@ -447,28 +448,17 @@ public class Inventory : MonoBehaviour, ISaveManager
     }
 
     // ==================== 物品数据库 ====================
-    // 编辑器模式下查找所有物品数据，运行时回退到初始物品
+    // 修复 B1：原实现在编辑器下用 AssetDatabase 扫描 Assets/Data/Items，
+    // 打包后（#else 分支）只回退到 startingItems，导致打包后加载存档时
+    // 所有非初始物品全部丢失。现统一改用显式登记的 ItemDatabase 资产，
+    // 编辑器与打包行为一致。
     private List<ItemData> GetItemDataBase()
     {
-        List<ItemData> itemDataBase = new List<ItemData>();
+        if (itemDatabase != null)
+            return itemDatabase.GetItems();
 
-#if UNITY_EDITOR
-        string[] assetNames = AssetDatabase.FindAssets("", new[] { "Assets/Data/Items" });
-        foreach (string SOName in assetNames)
-        {
-            var SOpath = AssetDatabase.GUIDToAssetPath(SOName);
-            var itemData = AssetDatabase.LoadAssetAtPath<ItemData>(SOpath);
-            itemDataBase.Add(itemData);
-        }
-#else
-        foreach (ItemData item in startingItems)
-        {
-            if (item != null && !itemDataBase.Contains(item))
-                itemDataBase.Add(item);
-        }
-#endif
-
-        return itemDataBase;
+        Debug.LogError($"[{nameof(Inventory)}] 未配置 ItemDatabase，无法解析存档中的物品数据。");
+        return new List<ItemData>();
     }
     #endregion
 }
