@@ -3,25 +3,28 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-
-//2024.11.28 17:04
+/// <summary>
+/// GameManager（游戏管理器）- 管理检查点、死亡掉落和场景重启
+/// 功能：检查点管理、死亡掉落货币、游戏暂停
+/// </summary>
 public class GameManager : MonoBehaviour, ISaveManager
 {
-    public static GameManager instance;//单例模式,全局变量
+    // ==================== 单例 ====================
+    public static GameManager instance;
 
-    private Transform player;//玩家的位置
-
-
+    // ==================== 核心引用 ====================
+    private Transform player;
     [SerializeField] private Checkpoint[] checkpoints;
-    [SerializeField] private string lastActivatedCheckpointId;  // 上一次激活的检查点ID
+    [SerializeField] private string lastActivatedCheckpointId;
 
+    // ==================== 死亡掉落货币 ====================
     [Header("Lost Currency")]
     [SerializeField] private GameObject lostCurrencyPrefab;
     public int lostCurrencyAmount;
-    [SerializeField] private float lostCurrencyX;//丢失灵魂的位置
+    [SerializeField] private float lostCurrencyX;
     [SerializeField] private float lostCurrencyY;
 
-
+    // ==================== 单例初始化 ====================
     private void Awake()
     {
         if (instance != null)
@@ -29,101 +32,79 @@ public class GameManager : MonoBehaviour, ISaveManager
         else
             instance = this;
 
-        checkpoints = FindObjectsOfType<Checkpoint>();//查找所有的检查点
+        checkpoints = FindObjectsOfType<Checkpoint>();
     }
-
 
     private void Start()
     {
         player = PlayerManager.instance.player.transform;
     }
 
-
+    // ==================== 场景重启 ====================
     public void RestartScene()
     {
-        SaveManager.instance.SaveGame();//保存游戏
+        SaveManager.instance.SaveGame();
         Scene scene = SceneManager.GetActiveScene();
         SceneManager.LoadScene(scene.name);
     }
 
-
-
+    // ==================== 存档/加载 ====================
     public void LoadData(GameData _data) => StartCoroutine(LoadWithDelay(_data));
 
-
-    private void LoadCheckpoint(GameData _data)//加载检查点
+    private void LoadCheckpoint(GameData _data)
     {
-        foreach (KeyValuePair<string, bool> pair in _data.checkpoints)//遍历数据中的检查点
+        foreach (KeyValuePair<string, bool> pair in _data.checkpoints)
         {
-            foreach (Checkpoint checkpoint in checkpoints)//遍历场景中的检查点
+            foreach (Checkpoint checkpoint in checkpoints)
             {
-                if (checkpoint.id == pair.Key && pair.Value == true) //如果检查点的ID和数据中的ID相同且激活状态为真
+                if (checkpoint.id == pair.Key && pair.Value == true)
                     checkpoint.ActivateCheckPoint();
-
             }
         }
     }
 
-
-
-    private void LoadLostCurrency(GameData _data)//加载丢失的灵魂
+    private void LoadLostCurrency(GameData _data)
     {
         lostCurrencyAmount = _data.lostCurrencyAmount;
         lostCurrencyX = _data.lostCurrencyX;
         lostCurrencyY = _data.lostCurrencyY;
 
-
-
         if (lostCurrencyAmount > 0)
         {
             GameObject newlostCurrency = Instantiate(lostCurrencyPrefab, new Vector3(lostCurrencyX, lostCurrencyY), Quaternion.identity);
             newlostCurrency.GetComponent<LostCurrencyController>().currency = lostCurrencyAmount;
-
-
         }
 
-        lostCurrencyAmount = 0;//重置丢失的灵魂数量
+        lostCurrencyAmount = 0;
     }
 
-
-
-    private IEnumerator LoadWithDelay(GameData _data)//延迟加载，防止其他数据未加载
+    private IEnumerator LoadWithDelay(GameData _data)
     {
         yield return new WaitForSeconds(.5f);
-
         LoadCheckpoint(_data);
         LoadClosetCheckpoint(_data);
         LoadLostCurrency(_data);
     }
-
-
-
 
     public void SaveData(ref GameData _data)
     {
         _data.lostCurrencyAmount = lostCurrencyAmount;
         _data.lostCurrencyX = player.position.x;
         _data.lostCurrencyY = player.position.y;
-
-        // 保存上一次激活的检查点ID（玩家经过的最后一个检查点）
         _data.closestCheckpointId = lastActivatedCheckpointId;
-
         _data.checkpoints.Clear();
 
         foreach (Checkpoint checkpoint in checkpoints)
-        {
-            _data.checkpoints.Add(checkpoint.id, checkpoint.activationStatus);//将检查点的ID和激活状态存入数据
-        }
+            _data.checkpoints.Add(checkpoint.id, checkpoint.activationStatus);
     }
 
-
-
-    private void LoadClosetCheckpoint(GameData _data)//将玩家放在上一次激活的检查点
+    // ==================== 检查点管理 ====================
+    private void LoadClosetCheckpoint(GameData _data)
     {
         if (string.IsNullOrEmpty(_data.closestCheckpointId))
             return;
 
-        lastActivatedCheckpointId = _data.closestCheckpointId;//将上一次激活的检查点ID存入变量
+        lastActivatedCheckpointId = _data.closestCheckpointId;
 
         foreach (Checkpoint checkpoint in checkpoints)
         {
@@ -132,41 +113,35 @@ public class GameManager : MonoBehaviour, ISaveManager
         }
     }
 
-
-    private Checkpoint FindClosestCheckpoint()//找到最近的检查点
+    private Checkpoint FindClosestCheckpoint()
     {
-        float closestDistance = Mathf.Infinity;//正无穷
+        float closestDistance = Mathf.Infinity;
         Checkpoint closestCheckpoint = null;
 
-        foreach (var checkpoint in checkpoints)//遍历所有的检查点
+        foreach (var checkpoint in checkpoints)
         {
-            float distanceToCheckpoint = Vector2.Distance(player.position, checkpoint.transform.position);//计算玩家和检查点之间的距离
+            float distanceToCheckpoint = Vector2.Distance(player.position, checkpoint.transform.position);
 
-            if (distanceToCheckpoint < closestDistance && checkpoint.activationStatus == true)//如果距离小于最近距离且检查点激活
+            if (distanceToCheckpoint < closestDistance && checkpoint.activationStatus == true)
             {
-                closestDistance = distanceToCheckpoint;//更新最近距离
-                closestCheckpoint = checkpoint;//更新最近检查点
+                closestDistance = distanceToCheckpoint;
+                closestCheckpoint = checkpoint;
             }
-
         }
         return closestCheckpoint;
     }
-    
-    // 设置上一次激活的检查点ID
+
     public void SetLastActivatedCheckpoint(string checkpointId)
     {
         lastActivatedCheckpointId = checkpointId;
     }
-    
-    public void PauseGame(bool _pause)//暂停游戏
+
+    // ==================== 游戏暂停 ====================
+    public void PauseGame(bool _pause)
     {
         if (_pause)
-        {
             Time.timeScale = 0f;
-        }
         else
-        {
             Time.timeScale = 1f;
-        }
     }
 }

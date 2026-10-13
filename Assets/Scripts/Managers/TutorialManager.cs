@@ -2,29 +2,38 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-// 教程管理器，单例模式，管理所有教程的显示和隐藏
+/// <summary>
+/// TutorialManager（教程管理器）- 管理教程面板的显示和存档
+/// 设计思路：使用PlayerPrefs记录已显示的教程，避免重复显示
+/// 使用场景：新手引导、操作提示、机制说明
+/// </summary>
 public class TutorialManager : MonoBehaviour
 {
+    // ==================== 单例 ====================
     public static TutorialManager instance;
 
+    // ==================== 教程UI ====================
     [Header("教程UI")]
-    [SerializeField] private GameObject tutorialPanel; // 教程面板
-    [SerializeField] private TMPro.TextMeshProUGUI tutorialText; // 教程文本组件
+    [SerializeField] private GameObject tutorialPanel;
+    [SerializeField] private TMPro.TextMeshProUGUI tutorialText;
 
+    // ==================== 动画设置 ====================
     [Header("动画设置")]
-    [SerializeField] private float fadeInDuration = 0.5f; // 淡入时间
-    [SerializeField] private float fadeOutDuration = 0.3f; // 淡出时间
+    [SerializeField] private float fadeInDuration = 0.5f;
+    [SerializeField] private float fadeOutDuration = 0.3f;
 
+    // ==================== 存档设置 ====================
     [Header("存档设置")]
-    [SerializeField] private string saveKey = "ShownTutorials"; // 存档键名
+    [SerializeField] private string saveKey = "ShownTutorials";
 
-    private CanvasGroup canvasGroup; // CanvasGroup用于控制透明度
-    private Coroutine currentCoroutine; // 当前运行的协程
-    private HashSet<string> shownTutorials; // 已显示的教程ID集合
+    // ==================== 内部状态 ====================
+    private CanvasGroup canvasGroup;
+    private Coroutine currentCoroutine;
+    private HashSet<string> shownTutorials;
 
+    // ==================== 单例初始化 ====================
     private void Awake()
     {
-        // 单例模式
         if (instance == null)
             instance = this;
         else
@@ -33,7 +42,6 @@ public class TutorialManager : MonoBehaviour
             return;
         }
 
-        // 初始化CanvasGroup
         if (tutorialPanel != null)
         {
             canvasGroup = tutorialPanel.GetComponent<CanvasGroup>();
@@ -44,20 +52,16 @@ public class TutorialManager : MonoBehaviour
             tutorialPanel.SetActive(false);
         }
 
-        // 加载已显示的教程
         LoadShownTutorials();
     }
 
     private void Start()
     {
-        // 如果没有设置教程UI，尝试自动查找
         if (tutorialPanel == null || tutorialText == null)
-        {
             FindTutorialUI();
-        }
     }
 
-    // 自动查找教程UI
+    // ==================== UI查找 ====================
     private void FindTutorialUI()
     {
         GameObject[] uiObjects = GameObject.FindGameObjectsWithTag("UI");
@@ -86,7 +90,7 @@ public class TutorialManager : MonoBehaviour
         }
     }
 
-    // 显示教程
+    // ==================== 教程显示 ====================
     public void ShowTutorial(string text, float duration)
     {
         if (tutorialText == null)
@@ -95,37 +99,25 @@ public class TutorialManager : MonoBehaviour
             return;
         }
 
-        // 设置教程文本
         tutorialText.text = text;
 
-        // 如果有正在运行的协程，先停止它
         if (currentCoroutine != null)
-        {
             StopCoroutine(currentCoroutine);
-        }
 
-        // 激活面板并开始淡入动画
         tutorialPanel.SetActive(true);
         currentCoroutine = StartCoroutine(ShowTutorialCoroutine(duration));
     }
 
-    // 显示教程协程
+    // ==================== 教程协程 ====================
+    // 淡入 -> 等待 -> 淡出
     private IEnumerator ShowTutorialCoroutine(float duration)
     {
-        // 淡入
         yield return StartCoroutine(FadeIn());
-
-        // 等待显示时间
         yield return new WaitForSeconds(duration);
-
-        // 淡出
         yield return StartCoroutine(FadeOut());
-
-        // 隐藏面板
         tutorialPanel.SetActive(false);
     }
 
-    // 立即隐藏教程
     public void HideTutorial()
     {
         if (currentCoroutine != null)
@@ -135,19 +127,16 @@ public class TutorialManager : MonoBehaviour
         }
 
         if (tutorialPanel != null)
-        {
             StartCoroutine(ImmediateHide());
-        }
     }
 
-    // 立即隐藏协程
     private IEnumerator ImmediateHide()
     {
         yield return StartCoroutine(FadeOut());
         tutorialPanel.SetActive(false);
     }
 
-    // 淡入动画
+    // ==================== 淡入淡出动画 ====================
     private IEnumerator FadeIn()
     {
         float elapsedTime = 0f;
@@ -164,7 +153,6 @@ public class TutorialManager : MonoBehaviour
         canvasGroup.alpha = targetAlpha;
     }
 
-    // 淡出动画
     private IEnumerator FadeOut()
     {
         float elapsedTime = 0f;
@@ -181,7 +169,7 @@ public class TutorialManager : MonoBehaviour
         canvasGroup.alpha = targetAlpha;
     }
 
-    // 标记教程为已显示
+    // ==================== 教程记录管理 ====================
     public void MarkTutorialAsShown(string tutorialId)
     {
         if (string.IsNullOrEmpty(tutorialId))
@@ -191,7 +179,6 @@ public class TutorialManager : MonoBehaviour
         SaveShownTutorials();
     }
 
-    // 检查教程是否已显示
     public bool HasShownTutorial(string tutorialId)
     {
         if (string.IsNullOrEmpty(tutorialId))
@@ -200,7 +187,6 @@ public class TutorialManager : MonoBehaviour
         return shownTutorials.Contains(tutorialId);
     }
 
-    // 重置所有教程（用于测试）
     public void ResetAllTutorials()
     {
         shownTutorials.Clear();
@@ -208,7 +194,7 @@ public class TutorialManager : MonoBehaviour
         Debug.Log("所有教程已重置");
     }
 
-    // 保存已显示的教程
+    // ==================== PlayerPrefs存档 ====================
     private void SaveShownTutorials()
     {
         string json = JsonUtility.ToJson(new TutorialSaveData { shownTutorials = new List<string>(shownTutorials) });
@@ -216,7 +202,6 @@ public class TutorialManager : MonoBehaviour
         PlayerPrefs.Save();
     }
 
-    // 加载已显示的教程
     private void LoadShownTutorials()
     {
         shownTutorials = new HashSet<string>();
@@ -227,13 +212,11 @@ public class TutorialManager : MonoBehaviour
             TutorialSaveData data = JsonUtility.FromJson<TutorialSaveData>(json);
 
             if (data != null && data.shownTutorials != null)
-            {
                 shownTutorials = new HashSet<string>(data.shownTutorials);
-            }
         }
     }
 
-    // 教程存档数据结构
+    // ==================== 存档数据结构 ====================
     [System.Serializable]
     private class TutorialSaveData
     {

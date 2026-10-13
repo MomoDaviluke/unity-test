@@ -3,34 +3,38 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-
-//2024年11月17日
+/// <summary>
+/// UI_SKillTreeSlot（技能树槽位UI）- 显示技能、处理解锁逻辑
+/// 功能：技能显示、前置条件检查、金币消耗解锁、存档/加载
+/// </summary>
 public class UI_SKillTreeSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, ISaveManager
 {
+    // ==================== 核心引用 ====================
     private UI ui;
-    private Image skillImage;//当前技能槽的图片组件
+    private Image skillImage;
 
-    [SerializeField] private int skillPirce;//技能价格
+    // ==================== 技能信息 ====================
+    [SerializeField] private int skillPirce;
     [SerializeField] private string skillName;
     [TextArea]
     [SerializeField] private string skillDescription;
-    [SerializeField] private Color lockedSkillColor;//技能未解锁时的颜色
-
-
+    [SerializeField] private Color lockedSkillColor;
     public bool unlocked;
 
-    [SerializeField] private UI_SKillTreeSlot[] shouldBeUnlocked;//解锁前置条件
-    [SerializeField] private UI_SKillTreeSlot[] shouldBeLocked;//锁定条件
+    // ==================== 解锁条件 ====================
+    [SerializeField] private UI_SKillTreeSlot[] shouldBeUnlocked;
+    [SerializeField] private UI_SKillTreeSlot[] shouldBeLocked;
 
-
-
+    // ==================== 编辑器验证 ====================
     private void OnValidate()
     {
         gameObject.name = "SkillTreeSlot_UI - " + skillName;
     }
+
+    // ==================== 初始化 ====================
     private void Awake()
     {
-        GetComponent<Button>().onClick.AddListener(() => UnlockSkillSlot());//给 Button 组件绑定点击事件，用于触发技能槽解锁逻辑
+        GetComponent<Button>().onClick.AddListener(() => UnlockSkillSlot());
     }
 
     private void Start()
@@ -38,21 +42,25 @@ public class UI_SKillTreeSlot : MonoBehaviour, IPointerEnterHandler, IPointerExi
         skillImage = GetComponent<Image>();
         ui = GetComponentInParent<UI>();
 
-        skillImage.color = lockedSkillColor;//设置初始颜色为锁定颜色
+        skillImage.color = lockedSkillColor;
         if (unlocked)
         {
-            skillImage.color = Color.white;//如果已经解锁，设置颜色为白色
+            skillImage.color = Color.white;
         }
     }
 
+    // ==================== 技能解锁 ====================
+    // 检查金币、前置条件、互斥条件，满足后解锁技能
     public void UnlockSkillSlot()
     {
         if (unlocked)
-            return; // 如果已经解锁，直接返回
-
-        if (PlayerManager.instance.HaveEnoughMoney(skillPirce) == false)//检查是否有足够的钱
             return;
-        for (int i = 0; i < shouldBeUnlocked.Length; i++)//前置解锁检查
+
+        if (PlayerManager.instance.HaveEnoughMoney(skillPirce) == false)
+            return;
+
+        // 前置技能检查
+        for (int i = 0; i < shouldBeUnlocked.Length; i++)
         {
             if (shouldBeUnlocked[i].unlocked == false)
             {
@@ -61,7 +69,8 @@ public class UI_SKillTreeSlot : MonoBehaviour, IPointerEnterHandler, IPointerExi
             }
         }
 
-        for (int i = 0; i < shouldBeLocked.Length; i++)//锁定检查
+        // 互斥技能检查
+        for (int i = 0; i < shouldBeLocked.Length; i++)
         {
             if (shouldBeLocked[i].unlocked == true)
             {
@@ -69,29 +78,28 @@ public class UI_SKillTreeSlot : MonoBehaviour, IPointerEnterHandler, IPointerExi
                 return;
             }
         }
+
         unlocked = true;
         skillImage.color = Color.white;
-
     }
 
+    // ==================== 鼠标交互 ====================
     public void OnPointerEnter(PointerEventData eventData)
     {
         ui.skillToolTip.ShowToolTip(skillDescription, skillName, skillPirce);
-
-
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        ui.skillToolTip.HideToolTip();//鼠标离开槽位时，隐藏技能描述提示框
+        ui.skillToolTip.HideToolTip();
     }
 
+    // ==================== 存档/加载 ====================
     public void LoadData(GameData _data)
     {
         if (_data.skillTree.TryGetValue(skillName, out bool value))
         {
             unlocked = value;
-
         }
     }
 

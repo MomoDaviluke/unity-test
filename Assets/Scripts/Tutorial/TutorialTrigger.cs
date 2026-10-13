@@ -2,40 +2,45 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// TutorialTrigger（教程触发器）- 检测玩家进入区域并显示教程
+/// 功能：区域检测、教程显示/隐藏、只显示一次控制
+/// </summary>
 public class TutorialTrigger : MonoBehaviour
 {
+    // ==================== 教程设置 ====================
     [Header("教程设置")]
     [SerializeField] private string tutorialId;
-     // 教程文本内容
     [SerializeField] private string tutorialText;
-    [SerializeField] private float displayDuration = 5f; // 显示持续时间
-    [SerializeField] private bool showOnlyOnce = true; // 是否只显示一次
+    [SerializeField] private float displayDuration = 5f;
+    [SerializeField] private bool showOnlyOnce = true;
 
+    // ==================== 触发区域 ====================
     [Header("触发区域")]
-    [SerializeField] private float triggerRadius = 3f; // 触发半径
-    [SerializeField] private LayerMask playerLayer; // 玩家层
+    [SerializeField] private float triggerRadius = 3f;
+    [SerializeField] private LayerMask playerLayer;
 
+    // ==================== 可视化 ====================
     [Header("可视化")]
-    [SerializeField] private bool showGizmos = true; // 是否在编辑器中显示触发区域
+    [SerializeField] private bool showGizmos = true;
 
-    private bool hasShown = false; // 是否已经显示过
-    [SerializeField] private bool playerInTrigger = false; // 玩家是否在触发区域内
+    // ==================== 内部状态 ====================
+    private bool hasShown = false;
+    [SerializeField] private bool playerInTrigger = false;
 
+    // ==================== 初始化 ====================
     private void Start()
     {
         if (showOnlyOnce && TutorialManager.instance != null)
-        {
             hasShown = TutorialManager.instance.HasShownTutorial(tutorialId);
-        }
     }
 
+    // ==================== 区域检测 ====================
     private void Update()
     {
-        // 如果已经显示过且设置为只显示一次，则不再检测
         if (hasShown && showOnlyOnce)
             return;
 
-        // 检测玩家是否在触发区域内
         Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, triggerRadius, playerLayer);
         bool currentPlayerInTrigger = false;
 
@@ -48,13 +53,11 @@ public class TutorialTrigger : MonoBehaviour
             }
         }
 
-        // 玩家进入区域
         if (currentPlayerInTrigger && !playerInTrigger)
         {
             playerInTrigger = true;
             ShowTutorial();
         }
-        // 玩家离开区域
         else if (!currentPlayerInTrigger && playerInTrigger)
         {
             playerInTrigger = false;
@@ -62,7 +65,7 @@ public class TutorialTrigger : MonoBehaviour
         }
     }
 
-    // 显示教程
+    // ==================== 显示/隐藏教程 ====================
     private void ShowTutorial()
     {
         if (TutorialManager.instance != null)
@@ -77,16 +80,13 @@ public class TutorialTrigger : MonoBehaviour
         }
     }
 
-    // 隐藏教程
     private void HideTutorial()
     {
         if (TutorialManager.instance != null)
-        {
             TutorialManager.instance.HideTutorial();
-        }
     }
 
-    // 在编辑器中绘制触发区域
+    // ==================== 编辑器可视化 ====================
     private void OnDrawGizmos()
     {
         if (!showGizmos)
@@ -95,7 +95,6 @@ public class TutorialTrigger : MonoBehaviour
         Gizmos.color = hasShown ? Color.gray : Color.yellow;
         Gizmos.DrawWireSphere(transform.position, triggerRadius);
 
-        // 显示教程文本
         if (!string.IsNullOrEmpty(tutorialText))
         {
             #if UNITY_EDITOR
@@ -104,7 +103,7 @@ public class TutorialTrigger : MonoBehaviour
         }
     }
 
-    // 重置教程状态（用于测试）
+    // ==================== 重置状态 ====================
     public void ResetTutorial()
     {
         hasShown = false;

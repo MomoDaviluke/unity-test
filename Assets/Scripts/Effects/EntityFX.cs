@@ -3,48 +3,62 @@ using System.Collections;
 using TMPro;
 using UnityEngine;
 
+/// <summary>
+/// EntityFX（实体特效基类）- 管理所有实体的视觉特效
+/// 功能：弹出文本、受击闪光、异常状态效果、攻击特效
+/// 设计思路：将特效逻辑集中管理，便于统一控制和扩展
+/// </summary>
 public class EntityFX : MonoBehaviour
 {
+    // ==================== 核心组件 ====================
     protected Player player;
     protected SpriteRenderer sr;
+
+    // ==================== 弹出文本 ====================
     [Header("弹出文本")]
     [SerializeField] private GameObject popUpTextPrefab;
 
+    // ==================== 闪光特效 ====================
     [Header("闪光特效")]
     [SerializeField] private float flashDuration;
     [SerializeField] private Material hitMat;
     private Material originalMat;
 
+    // ==================== 异常状态颜色 ====================
     [Header("异常状态颜色")]
     [SerializeField] private Color[] chillColor;
     [SerializeField] private Color[] igniteColor;
     [SerializeField] private Color[] shockColor;
 
+    // ==================== 异常状态粒子 ====================
     [Header("异常状态粒子")]
     [SerializeField] private ParticleSystem igniteFX;
     [SerializeField] private ParticleSystem chillFX;
     [SerializeField] private ParticleSystem shockFX;
 
+    // ==================== 攻击特效 ====================
     [Header("攻击特效")]
     [SerializeField] private GameObject hitFx;
     [SerializeField] private GameObject criticalHitFx;
 
+    // ==================== 弹出文本颜色 ====================
     [Header("弹出文本颜色")]
     [SerializeField] private Color physicalDamageColor = Color.white;
-    [SerializeField] private Color fireDamageColor = new Color(1f, 0.5f, 0f); // 橙红色
-    [SerializeField] private Color iceDamageColor = new Color(0.5f, 0.8f, 1f); // 淡蓝色
-    [SerializeField] private Color lightningDamageColor = new Color(1f, 1f, 0f); // 黄色
-    [SerializeField] private Color criticalDamageColor = new Color(1f, 0f, 0f); // 红色
-    [SerializeField] private Color healColor = new Color(0f, 1f, 0f); // 绿色
+    [SerializeField] private Color fireDamageColor = new Color(1f, 0.5f, 0f);
+    [SerializeField] private Color iceDamageColor = new Color(0.5f, 0.8f, 1f);
+    [SerializeField] private Color lightningDamageColor = new Color(1f, 1f, 0f);
+    [SerializeField] private Color criticalDamageColor = new Color(1f, 0f, 0f);
+    [SerializeField] private Color healColor = new Color(0f, 1f, 0f);
     private GameObject myHealthBar;
 
+    // ==================== 初始化 ====================
     protected virtual void Start()
     {
         sr = GetComponentInChildren<SpriteRenderer>();
         if (sr == null)
         {
             Debug.LogError($"SpriteRenderer not found on {gameObject.name}");
-            enabled = false;  // 禁用脚本避免后续错误
+            enabled = false;
             return;
         }
 
@@ -62,27 +76,22 @@ public class EntityFX : MonoBehaviour
             Debug.LogWarning($"UI_HealthBar not found on {gameObject.name}");
     }
 
-
-
-    /// 创建伤害弹出文本
+    /// <summary>
+    // ==================== 弹出文本 ====================
     public void CreatePopUpText(string _text, DamageType _damageType = DamageType.Physical, bool _isCritical = false)
     {
         float randomX = Random.Range(-1, 1);
         float randomY = Random.Range(1.5f, 3f);
-
         Vector3 positionOffset = new Vector3(randomX, randomY, 0);
 
-
         GameObject newText = Instantiate(popUpTextPrefab, transform.position + positionOffset, Quaternion.identity);
-
         TextMeshPro textMesh = newText.GetComponent<TextMeshPro>();
         textMesh.text = _text;
 
-        // 根据伤害类型设置颜色
         if (_isCritical)
         {
             textMesh.color = criticalDamageColor;
-            textMesh.fontSize += 2; // 暴击伤害文字稍大
+            textMesh.fontSize += 2;
         }
         else
         {
@@ -107,11 +116,9 @@ public class EntityFX : MonoBehaviour
         }
     }
 
-
-
+    // ==================== 透明度控制 ====================
     public void MakeTransprent(bool _transprent)
     {
-        // 添加null检查
         if (sr == null)
         {
             Debug.LogWarning("SpriteRenderer is null in MakeTransprent");
@@ -130,6 +137,8 @@ public class EntityFX : MonoBehaviour
             sr.color = Color.white;
         }
     }
+
+    // ==================== 受击闪光 ====================
     private IEnumerator FlashFX()
     {
         sr.material = hitMat;
@@ -141,6 +150,10 @@ public class EntityFX : MonoBehaviour
         sr.color = currentColor;
         sr.material = originalMat;
     }
+
+    /// <summary>
+    /// 红色闪烁：低血量警告
+    /// </summary>
     private void RedColorBlink()
     {
         if (sr.color != Color.white)
@@ -148,6 +161,8 @@ public class EntityFX : MonoBehaviour
         else
             sr.color = Color.red;
     }
+
+    // ==================== 取消异常状态 ====================
     private void CancelColorChange()
     {
         CancelInvoke();
@@ -156,87 +171,68 @@ public class EntityFX : MonoBehaviour
         igniteFX.Stop();
         chillFX.Stop();
         shockFX.Stop();
-
     }
+
+    // ==================== 异常状态效果 ====================
     public void IgniteFxFor(float _seconds)
     {
         igniteFX.Play();
         InvokeRepeating("igniteColorFx", 0, 0.3f);
         Invoke("CancelColorChange", _seconds);
     }
+
     public void ChilFxFor(float _seconds)
     {
         chillFX.Play();
         InvokeRepeating("ChillColorFx", 0, 0.3f);
         Invoke("CancelColorChange", _seconds);
     }
+
     public void ShockFxFor(float _seconds)
     {
         shockFX.Play();
         InvokeRepeating("shockColorFx", 0, 0.3f);
         Invoke("CancelColorChange", _seconds);
     }
+
     private void igniteColorFx()
     {
-        if (sr.color != igniteColor[0])
-        {
-            sr.color = igniteColor[0];
-        }
-        else
-        {
-            sr.color = igniteColor[1];
-        }
-    }
-    private void ChillColorFx()
-    {
-        if (sr.color != chillColor[0])
-        {
-            sr.color = chillColor[0];
-        }
-        else
-        {
-            sr.color = chillColor[1];
-        }
-    }
-    private void shockColorFx()
-    {
-        if (sr.color != shockColor[0])
-        {
-            sr.color = shockColor[0];
-        }
-        else
-        {
-            sr.color = shockColor[1];
-        }
+        sr.color = sr.color != igniteColor[0] ? igniteColor[0] : igniteColor[1];
     }
 
-    //灰尘的粒子效果
+    private void ChillColorFx()
+    {
+        sr.color = sr.color != chillColor[0] ? chillColor[0] : chillColor[1];
+    }
+
+    private void shockColorFx()
+    {
+        sr.color = sr.color != shockColor[0] ? shockColor[0] : shockColor[1];
+    }
+
+    // ==================== 受击特效 ====================
     public void CreateFitFx(Transform _target, bool _critical)
     {
         if (_target == null)
             return;
 
         float zRotation = Random.Range(-90, 90);
-
         Vector3 hitFxRotion = new Vector3(0, 0, zRotation);
         Vector3 hitPosition = _target.position;
 
         Collider2D targetCollider = _target.GetComponent<Collider2D>();
-
         if (targetCollider == null)
             targetCollider = _target.GetComponentInChildren<Collider2D>();
 
         if (targetCollider != null)
-        {
             hitPosition = targetCollider.ClosestPoint(transform.position);
-        }
 
         GameObject hitPrefab = hitFx;
 
+        // 暴击使用不同的特效和旋转
         if (_critical)
         {
             hitPrefab = criticalHitFx;
-
             float yRotation = 0;
             zRotation = Random.Range(-45, 45);
 
@@ -244,7 +240,6 @@ public class EntityFX : MonoBehaviour
                 yRotation = 180;
 
             hitFxRotion = new Vector3(0, yRotation, zRotation);
-
         }
 
         if (hitPrefab == null)
@@ -254,5 +249,4 @@ public class EntityFX : MonoBehaviour
         newHitFx.transform.Rotate(hitFxRotion);
         Destroy(newHitFx, 0.5f);
     }
-
 }

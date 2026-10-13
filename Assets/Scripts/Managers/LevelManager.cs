@@ -3,23 +3,31 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-// 关卡管理器：管理关卡切换和进度（支持叠加场景加载）
+/// <summary>
+/// LevelManager（关卡管理器）- 管理关卡切换和叠加场景加载
+/// 设计思路：使用叠加场景（Additive）加载关卡，主场景保持常驻
+/// 使用场景：通关后加载下一关、死亡后重启当前关卡、返回主菜单
+/// </summary>
 public class LevelManager : MonoBehaviour, ISaveManager
 {
+    // ==================== 单例 ====================
     public static LevelManager instance;
-    
+
+    // ==================== 关卡设置 ====================
     [Header("关卡设置")]
     [SerializeField] private List<string> levelNames = new List<string>
     {
         "Level1Scene",
         "Level2Scene"
     };
-    
+
+    // ==================== 当前关卡 ====================
     [Header("当前关卡")]
     public int currentLevelIndex = 0;
     public string currentLevelName { get; private set; }
-    public bool isLoading { get; private set; }  // 是否正在加载中
-    
+    public bool isLoading { get; private set; }
+
+    // ==================== 单例初始化 ====================
     private void Awake()
     {
         if (instance != null)
@@ -27,59 +35,53 @@ public class LevelManager : MonoBehaviour, ISaveManager
         else
             instance = this;
     }
-    
+
+    // ==================== 启动初始化 ====================
     private void Start()
     {
-        // 检查是否是第一次启动（新游戏）
-        // 如果SaveManager中没有存档数据，说明是新游戏
         if (SaveManager.instance != null && !SaveManager.instance.HasSavedData())
         {
-            // 新游戏，加载第一关
             currentLevelIndex = 0;
             MovePlayerToInitialPosition();
         }
         else
         {
-            // 有存档，检测当前加载的子场景
             string currentSubScene = GetCurrentSubSceneName();
-            
             if (!string.IsNullOrEmpty(currentSubScene))
             {
                 currentLevelName = currentSubScene;
                 currentLevelIndex = levelNames.IndexOf(currentLevelName);
-                
                 if (currentLevelIndex < 0)
                     currentLevelIndex = 0;
             }
         }
     }
 
-    // 新游戏初始化
+    // ==================== 新游戏 ====================
     public void InitializeNewGame()
     {
         currentLevelIndex = 0;
         currentLevelName = "Level1Scene";
         MovePlayerToInitialPosition();
     }
-    
-    // 获取当前子场景名称
+
+    // ==================== 场景查询 ====================
     private string GetCurrentSubSceneName()
     {
         for (int i = 0; i < SceneManager.sceneCount; i++)
         {
             Scene scene = SceneManager.GetSceneAt(i);
-            // 跳过主场景和已加载的场景
             if (scene.name != "MainScene" && scene.isLoaded)
                 return scene.name;
         }
         return string.Empty;
     }
-    
-    // 加载下一关
+
+    // ==================== 关卡加载 ====================
     public void LoadNextLevel()
     {
         if (isLoading) return;
-        
+
         if (currentLevelIndex < levelNames.Count - 1)
         {
             currentLevelIndex++;
@@ -91,8 +93,7 @@ public class LevelManager : MonoBehaviour, ISaveManager
             LoadMainMenu();
         }
     }
-    
-    // 加载指定关卡（异步叠加加载）
+
     public void LoadLevel(string levelName)
     {
         if (isLoading || string.IsNullOrEmpty(levelName))
@@ -100,23 +101,20 @@ public class LevelManager : MonoBehaviour, ISaveManager
             Debug.Log($"[LevelManager] 正在加载中或关卡名为空，跳过加载请求: {levelName}");
             return;
         }
-        
+
         Debug.Log($"[LevelManager] 开始加载关卡: {levelName}");
         isLoading = true;
-        
-        // 先移动玩家到目标关卡的初始位置（避免切换时掉下去）
+
         if (levelName == "Level2Scene")
-        {
             MovePlayerToPosition(new Vector2(-7.47f, -3f));
-        }
-        
+
         StartCoroutine(LoadLevelCoroutine(levelName));
     }
-    
-    // 异步加载关卡协程
+
+    // ==================== 加载协程 ====================
+    // 先卸载旧场景，再叠加加载新场景
     private IEnumerator LoadLevelCoroutine(string levelName)
     {
-        // 卸载当前子场景
         if (!string.IsNullOrEmpty(currentLevelName))
         {
             Debug.Log($"[LevelManager] 卸载当前场景: {currentLevelName}");
@@ -124,34 +122,35 @@ public class LevelManager : MonoBehaviour, ISaveManager
             yield return unloadOperation;
             Debug.Log($"[LevelManager] 场景卸载完成: {currentLevelName}");
         }
-        
-        // 加载新子场景
+
         Debug.Log($"[LevelManager] 开始加载新场景: {levelName}");
         AsyncOperation loadOperation = SceneManager.LoadSceneAsync(levelName, LoadSceneMode.Additive);
         yield return loadOperation;
         Debug.Log($"[LevelManager] 场景加载完成: {levelName}");
-        
+
         currentLevelName = levelName;
         isLoading = false;
-        
-        // 如果是第一个场景（Level1Scene），将玩家传送到初始位置
+
         if (levelName == "Level1Scene" || levelName == "Level2Scene")
         {
             Debug.Log($"[LevelManager] 定位玩家到 {levelName} 的初始位置");
             MovePlayerToInitialPosition();
         }
-        
+
         Debug.Log($"[LevelManager] 关卡加载完成：{levelName}");
     }
-    
-    // 将玩家移动到初始位置
+
+    /// <summary>
+    /// 移动玩家到初始位置
+    /// </summary>
     private void MovePlayerToInitialPosition()
     {
-        // 等待一帧确保场景已加载
         StartCoroutine(MovePlayerToInitialPositionCoroutine());
     }
-    
-    // 直接移动玩家到指定位置
+
+    /// <summary>
+    /// 将玩家移动到指定位置
+    /// </summary>
     public void MovePlayerToPosition(Vector2 position)
     {
         if (PlayerManager.instance != null && PlayerManager.instance.player != null)
@@ -160,16 +159,15 @@ public class LevelManager : MonoBehaviour, ISaveManager
             Debug.Log($"[LevelManager] 玩家移动到: {position}");
         }
     }
-    
+
+    // ==================== 玩家位置管理 ====================
+    // 移动玩家到初始位置，包含重试机制
     private IEnumerator MovePlayerToInitialPositionCoroutine()
     {
-        // 等待足够的时间让所有场景加载完成
         yield return new WaitForSeconds(0.5f);
-        
-        // 初始位置坐标
+
         Vector2 initialPosition = new Vector2(-7.47f, -3f);
-        
-        // 尝试获取玩家
+
         if (PlayerManager.instance != null && PlayerManager.instance.player != null)
         {
             PlayerManager.instance.player.transform.position = initialPosition;
@@ -177,9 +175,8 @@ public class LevelManager : MonoBehaviour, ISaveManager
         }
         else
         {
-            // 再次尝试
             yield return new WaitForSeconds(0.5f);
-            
+
             if (PlayerManager.instance != null && PlayerManager.instance.player != null)
             {
                 PlayerManager.instance.player.transform.position = initialPosition;
@@ -187,7 +184,6 @@ public class LevelManager : MonoBehaviour, ISaveManager
             }
             else
             {
-                // 最后尝试直接查找
                 Player player = FindObjectOfType<Player>();
                 if (player != null)
                 {
@@ -201,21 +197,20 @@ public class LevelManager : MonoBehaviour, ISaveManager
             }
         }
     }
-    
-    // 加载主菜单
+
+    // ==================== 主菜单 ====================
     public void LoadMainMenu()
     {
         SceneManager.LoadScene("MainMenu", LoadSceneMode.Single);
     }
-    
-    // 重新开始当前关卡
+
+    // ==================== 关卡重启 ====================
     public void RestartCurrentLevel()
     {
         SaveManager.instance?.SaveGame();
         StartCoroutine(ReloadCurrentLevelCoroutine());
     }
-    
-    // 重新加载当前关卡协程
+
     private IEnumerator ReloadCurrentLevelCoroutine()
     {
         if (!string.IsNullOrEmpty(currentLevelName))
@@ -223,34 +218,30 @@ public class LevelManager : MonoBehaviour, ISaveManager
             AsyncOperation unloadOperation = SceneManager.UnloadSceneAsync(currentLevelName);
             yield return unloadOperation;
         }
-        
+
         AsyncOperation loadOperation = SceneManager.LoadSceneAsync(currentLevelName, LoadSceneMode.Additive);
         yield return loadOperation;
     }
-    
-    // 是否是最后一关
+
+    // ==================== 关卡查询 ====================
     public bool IsLastLevel()
     {
         return currentLevelIndex >= levelNames.Count - 1;
     }
-    
-    // 获取关卡总数
+
     public int GetTotalLevels()
     {
         return levelNames.Count;
     }
-    
-    // 存档接口
+
+    // ==================== 存档/加载 ====================
     public void LoadData(GameData _data)
     {
         currentLevelIndex = _data.currentLevelIndex;
-        // 加载保存的关卡
         if (currentLevelIndex >= 0 && currentLevelIndex < levelNames.Count)
-        {
             LoadLevel(levelNames[currentLevelIndex]);
-        }
     }
-    
+
     public void SaveData(ref GameData _data)
     {
         _data.currentLevelIndex = currentLevelIndex;

@@ -4,21 +4,29 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// UI_CraftWindow（合成窗口UI）- 显示装备合成详情和材料需求
+/// 功能：显示装备信息、材料需求、合成按钮
+/// </summary>
 public class UI_CraftWindow : MonoBehaviour
 {
+    // ==================== 装备信息 ====================
     [SerializeField] private TextMeshProUGUI itemName;
     [SerializeField] private TextMeshProUGUI itemDescription;
-    [SerializeField] private Image itemIcon;  // 重命名为更清晰的名称
+    [SerializeField] private Image itemIcon;
     [SerializeField] private Button craftButton;
 
+    // ==================== 材料显示 ====================
     [SerializeField] private Image[] materialImage;
 
+    // ==================== 窗口关闭 ====================
     private void OnDisable()
     {
-        // 当窗口关闭时移除所有监听器
         craftButton.onClick.RemoveAllListeners();
     }
 
+    // ==================== 设置合成窗口 ====================
+    // 根据装备数据更新窗口显示，包括图标、材料、描述
     public void SetCraftWindow(ItemData_Equipment _data)
     {
         if (_data == null)
@@ -33,10 +41,9 @@ public class UI_CraftWindow : MonoBehaviour
                 materialText.color = Color.clear;
         }
 
-        // 确保craftingMaterials不为null
+        // 显示所需材料
         if (_data.craftRequirements != null)
         {
-            // 显示材料图标
             for (int i = 0; i < _data.craftRequirements.Count; i++)
             {
                 if (i >= materialImage.Length)
@@ -47,7 +54,7 @@ public class UI_CraftWindow : MonoBehaviour
 
                 if (_data.craftRequirements[i] != null && _data.craftRequirements[i].data != null)
                 {
-                    materialImage[i].sprite = _data.craftRequirements[i].data.itemIcon;  // 使用itemIcon而不是icon
+                    materialImage[i].sprite = _data.craftRequirements[i].data.itemIcon;
                     materialImage[i].color = Color.white;
 
                     TextMeshProUGUI materialSlotText = materialImage[i].GetComponentInChildren<TextMeshProUGUI>();
@@ -60,12 +67,12 @@ public class UI_CraftWindow : MonoBehaviour
             }
         }
 
-        // 设置物品信息
-        itemIcon.sprite = _data.itemIcon;  // 使用itemIcon而不是icon
+        // 设置装备信息
+        itemIcon.sprite = _data.itemIcon;
         itemName.text = _data.itemName;
         itemDescription.text = _data.GetDescription();
 
-        // 移除旧的监听器并添加新的
+        // 绑定合成按钮事件
         craftButton.onClick.RemoveAllListeners();
         craftButton.onClick.AddListener(() => Inventory.instance.CanCraft(_data, _data.craftRequirements));
     }

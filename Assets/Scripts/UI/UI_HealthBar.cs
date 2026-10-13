@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// UI_HealthBar（血条UI）- 显示实体的血量，翻转时同步翻转
+/// </summary>
 public class UI_HealthBar : MonoBehaviour
 {
     private Entity entity => GetComponentInParent<Entity>();
@@ -14,7 +17,6 @@ public class UI_HealthBar : MonoBehaviour
     {
         myTransform = GetComponent<RectTransform>();
         slider = GetComponentInChildren<Slider>();
-
         UpdateHealthUI();
     }
 
@@ -34,10 +36,10 @@ public class UI_HealthBar : MonoBehaviour
     {
         if(entity != null)
             entity.onFlipped -= FlipUI;
-        
         if(myStats != null)
             myStats.onHealthChanged -= UpdateHealthUI;
     }
+
     private void FlipUI() {
         if(myTransform)
             myTransform.Rotate(0, 180, 0);

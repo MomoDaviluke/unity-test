@@ -4,15 +4,19 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// UI_StatToolTip（属性提示框UI）- 显示属性描述信息
+/// 功能：显示属性描述、防止射线阻挡
+/// </summary>
 public class UI_StatToolTip : UI_ToolTip
 {
     [SerializeField] private TextMeshProUGUI description;
 
-    private CanvasGroup canvasGroup;  // 用于控制射线阻挡
+    private CanvasGroup canvasGroup;
 
+    // ==================== 初始化 ====================
     protected virtual void Awake()
     {
-        // 获取或添加 CanvasGroup 组件
         canvasGroup = GetComponent<CanvasGroup>();
         if (canvasGroup == null)
         {
@@ -22,6 +26,7 @@ public class UI_StatToolTip : UI_ToolTip
         canvasGroup.blocksRaycasts = false;
     }
 
+    // ==================== 显示/隐藏 ====================
     public void ShowStatToolTip(string _text)
     {
         description.text = _text;
@@ -29,6 +34,7 @@ public class UI_StatToolTip : UI_ToolTip
 
         gameObject.SetActive(true);
     }
+
     public void HideStatToolTip()
     {
         description.text = "";
