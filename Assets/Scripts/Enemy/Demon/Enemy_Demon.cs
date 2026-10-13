@@ -24,8 +24,9 @@ public class Enemy_Demon : Enemy
     public int formLevel = 1;
 
     // ==================== 移动参数 ====================
+    // 修复 B5：不再在此重新声明 chaseSpeed。基类 Enemy.chaseSpeed 已由 Inspector 序列化（值 4），
+    // 派生字段遮蔽会让 Enemy.SlowEntityBy 的减速改到基类字段、而 DemonWalkState 读派生字段，减速对 Boss 失效。
     [Header("移动设置")]
-    public float chaseSpeed = 4f;
     public float stopDistance = 3f;
 
     // ==================== 技能冷却管理 ====================
