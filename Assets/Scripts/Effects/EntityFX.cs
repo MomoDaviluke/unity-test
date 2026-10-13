@@ -84,7 +84,10 @@ public class EntityFX : MonoBehaviour
         float randomY = Random.Range(1.5f, 3f);
         Vector3 positionOffset = new Vector3(randomX, randomY, 0);
 
-        GameObject newText = Instantiate(popUpTextPrefab, transform.position + positionOffset, Quaternion.identity);
+        // Phase 2 池化最小接入示例：伤害数字改由对象池取出（PopUpTextFx.OnEnable 负责复用状态重置）
+        GameObject newText = PoolManager.Instance.Spawn(popUpTextPrefab, transform.position + positionOffset, Quaternion.identity);
+        if (newText == null)
+            return;
         TextMeshPro textMesh = newText.GetComponent<TextMeshPro>();
         textMesh.text = _text;
 
