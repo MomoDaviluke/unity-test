@@ -203,7 +203,7 @@ public class Player : Entity
     /// <summary>
     /// 减速效果 - 被技能或陷阱减速时调用，持续指定时间后自动恢复
     /// </summary>
-    protected override void SlowEntityBy(float _slowPercentage, float _slowDuration)
+    public override void SlowEntityBy(float _slowPercentage, float _slowDuration)
     {
         base.SlowEntityBy(_slowPercentage, _slowDuration);
         moveSpeed = moveSpeed * (1 - _slowPercentage);
