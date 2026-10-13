@@ -18211,7 +18211,6 @@ MonoBehaviour:
   lastTimeAttacked: 0
   bossFightBegun: 0
   formLevel: 1
-  chaseSpeed: 4
   stopDistance: 3
   skillCooldown: 3
   lastTimeSkillUsed: 0
