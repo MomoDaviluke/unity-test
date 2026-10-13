@@ -101,20 +101,28 @@ public class Enemy_DeathBringer : Enemy
 
     // ==================== 传送位置查找 ====================
     // 在arena范围内随机选取位置，确保下方有地面且周围无障碍物
-    // 使用递归直到找到有效位置
+    // 修复 B6：原实现为无深度上限的递归重试，极端布局下会栈溢出/死循环卡死。
+    //          改为带上限的迭代查找，超过上限后沿用最后一次落点并告警。
+    private const int MaxFindPositionAttempts = 30;
+
     public void FindPosition()
     {
-        float x = Random.Range(arena.bounds.min.x + 3, arena.bounds.max.x - 3);
-        float y = Random.Range(arena.bounds.min.y + 3, arena.bounds.max.y - 3);
-
-        transform.position = new Vector3(x, y);
-        transform.position = new Vector3(transform.position.x, transform.position.y - GroundBelow().distance + (cd.size.y / 2));
-
-        if (!GroundBelow() || SomethingIsAround())
+        for (int i = 0; i < MaxFindPositionAttempts; i++)
         {
+            float x = Random.Range(arena.bounds.min.x + 3, arena.bounds.max.x - 3);
+            float y = Random.Range(arena.bounds.min.y + 3, arena.bounds.max.y - 3);
+
+            transform.position = new Vector3(x, y);
+            transform.position = new Vector3(transform.position.x, transform.position.y - GroundBelow().distance + (cd.size.y / 2));
+
+            // 落点有效：下方有地面且周围无障碍物
+            if (GroundBelow() && !SomethingIsAround())
+                return;
+
             Debug.Log("Looking for new position");
-            FindPosition();
         }
+
+        Debug.LogWarning($"[{gameObject.name}] 传送落点查找达到 {MaxFindPositionAttempts} 次上限，沿用最后一次落点，请检查 arena 布局。");
     }
 
     // ==================== 辅助检测方法 ====================
