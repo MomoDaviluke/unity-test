@@ -20,34 +20,41 @@ public class Enemy : Entity
     [Header("检测参数")]
     [SerializeField] protected LayerMask isPlayer;      // 玩家层掩码：用于射线检测过滤玩家
 
+    // ==================== 数据模板 ====================
+    // Phase 4 数据化：公共战斗参数唯一数据源为 EnemyData 资产（只读模板）。
+    // 运行时数值字段在 Awake 从模板拷贝——SO 被同类所有实例共享，
+    // 而 moveSpeed/chaseSpeed/attackCooldown 会被减速/随机冷却逻辑修改，必须用实例副本。
+    [Header("数据")]
+    [SerializeField] private EnemyData enemyData;
+
     // ==================== 反击与眩晕系统 ====================
     // 设计思路：敌人在攻击前摇时打开反击窗口，玩家在此窗口内攻击可触发眩晕
     // counterImage用于视觉提示玩家"现在可以反击"，增强战斗反馈
-    [Header("眩晕参数")]
-    public float stunDuration = 1;                      // 眩晕持续时间：被反击后无法行动的时间
-    public Vector2 stunDirection = new Vector2(10, 12); // 眩晕击退方向：X=水平击退，Y=垂直击飞
+    [Header("眩晕参数（运行时副本，勿直接改）")]
+    public float stunDuration;                          // 眩晕持续时间：被反击后无法行动的时间
+    public Vector2 stunDirection;                       // 眩晕击退方向：X=水平击退，Y=垂直击飞
     protected bool canBeStunned;                        // 是否可以被眩晕：仅在攻击窗口期内为true
     [SerializeField] protected GameObject counterImage; // 反击提示图标：玩家可反击时显示
 
     // ==================== 移动与巡逻参数 ====================
     // 敌人有两种速度：巡逻时较慢（moveSpeed），发现玩家后加速追击（chaseSpeed）
     // idleTime控制巡逻时的停留，battleTime控制失去目标后的警惕持续时间
-    [Header("移动参数")]
-    public float moveSpeed = 1.5f;                      // 基础移动速度：巡逻时的速度
-    public float chaseSpeed = 3;                        // 追击速度：发现玩家后的移动速度
-    public float idleTime = 2;                          // 待机时间：巡逻时停留的时长
-    public float battleTime = 7;                        // 战斗状态持续时间：失去玩家视野后保持警惕的时间
+    [Header("移动参数（运行时副本，勿直接改）")]
+    public float moveSpeed;                             // 基础移动速度：巡逻时的速度
+    public float chaseSpeed;                            // 追击速度：发现玩家后的移动速度
+    public float idleTime;                              // 待机时间：巡逻时停留的时长
+    public float battleTime;                            // 战斗状态持续时间：失去玩家视野后保持警惕的时间
     private float defaultMoveSpeed;                     // 默认移动速度：用于减速后恢复
 
     // ==================== 攻击参数配置 ====================
     // 攻击冷却使用随机范围（min-max），让敌人攻击节奏更自然不机械
     // attackDistance是近战攻击的触发距离，agroDistance是发现玩家的仇恨距离
-    [Header("攻击参数")]
-    public float attackDistance = 2;                    // 攻击距离：进入此距离开始攻击
-    public float attackCooldown = 2;                    // 攻击冷却时间：两次攻击之间的间隔
-    public float minAttackCooldown = 1;                 // 最小攻击冷却：随机冷却的下限
-    public float maxAttackCooldown = 2;                 // 最大攻击冷却：随机冷却的上限
-    public float agroDistance = 3;                      // 仇恨距离：进入此范围开始追击玩家
+    [Header("攻击参数（运行时副本，勿直接改）")]
+    public float attackDistance;                        // 攻击距离：进入此距离开始攻击
+    public float attackCooldown;                        // 攻击冷却时间：两次攻击之间的间隔
+    public float minAttackCooldown;                     // 最小攻击冷却：随机冷却的下限
+    public float maxAttackCooldown;                     // 最大攻击冷却：随机冷却的上限
+    public float agroDistance;                          // 仇恨距离：进入此范围开始追击玩家
     [HideInInspector] public float lastTimeAttacked;    // 上次攻击时间：用于计算攻击冷却
 
     // ==================== 核心组件引用 ====================
@@ -62,11 +69,33 @@ public class Enemy : Entity
     // 注意：状态机在此仅初始化，具体状态由子类在Start中添加
 
     /// <summary>
-    /// 初始化：创建状态机并保存默认速度
+    /// 初始化：从 EnemyData 模板拷贝战斗参数到实例字段，创建状态机并保存默认速度
     /// </summary>
     protected override void Awake()
     {
         base.Awake();
+
+        // Phase 4 数据化：SO 模板被同类所有实例共享，而 moveSpeed/chaseSpeed/attackCooldown
+        // 会被减速/随机冷却等运行时逻辑修改，故拷贝到实例字段后再使用
+        if (enemyData != null)
+        {
+            stunDuration = enemyData.stunDuration;
+            stunDirection = enemyData.stunDirection;
+            moveSpeed = enemyData.moveSpeed;
+            chaseSpeed = enemyData.chaseSpeed;
+            idleTime = enemyData.idleTime;
+            battleTime = enemyData.battleTime;
+            attackDistance = enemyData.attackDistance;
+            attackCooldown = enemyData.attackCooldown;
+            minAttackCooldown = enemyData.minAttackCooldown;
+            maxAttackCooldown = enemyData.maxAttackCooldown;
+            agroDistance = enemyData.agroDistance;
+        }
+        else
+        {
+            Debug.LogError($"[{GetType().Name}] 未配置 enemyData，战斗参数将为 0！");
+        }
+
         stateMachine = new EnemyStateMachine();
         defaultMoveSpeed = moveSpeed;
     }
@@ -247,11 +276,13 @@ public class Enemy : Entity
     // 在Scene视图中绘制黄色线条表示攻击距离，便于调整平衡性
     /// <summary>
     /// 绘制攻击范围辅助线（Scene视图可见）
+    /// 编辑态运行时字段未初始化（值为0），优先读 EnemyData 模板
     /// </summary>
     protected override void OnDrawGizmos()
     {
         base.OnDrawGizmos();
+        float gizmoAttackDistance = enemyData != null ? enemyData.attackDistance : attackDistance;
         Gizmos.color = Color.yellow;
-        Gizmos.DrawLine(transform.position, new Vector3(transform.position.x + attackDistance * facingDir, transform.position.y));
+        Gizmos.DrawLine(transform.position, new Vector3(transform.position.x + gizmoAttackDistance * facingDir, transform.position.y));
     }
 }

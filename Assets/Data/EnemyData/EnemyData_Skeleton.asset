@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e3c93d5a2f1b8e4c9d6a05f1e2b3c4d, type: 3}
+  m_Name: EnemyData_Skeleton
+  m_EditorClassIdentifier: 
+  stunDuration: 1
+  stunDirection: {x: 7, y: 12}
+  moveSpeed: 1.5
+  chaseSpeed: 3
+  idleTime: 2
+  battleTime: 7
+  attackDistance: 2
+  attackCooldown: 0.4
+  minAttackCooldown: 0.35
+  maxAttackCooldown: 0.55
+  agroDistance: 3
