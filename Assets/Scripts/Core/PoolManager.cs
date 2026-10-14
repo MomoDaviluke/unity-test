@@ -75,6 +75,13 @@ public class PoolManager : MonoBehaviour
 
     // ==================== 取出 ====================
     public GameObject Spawn(GameObject _prefab, Vector3 _position, Quaternion _rotation)
+        => Spawn(_prefab, _position, _rotation, null);
+
+    /// <summary>
+    /// 取出实例。可选 parent：命中特效等需跟随目标移动的原 Instantiate(prefab, pos, rot, target)
+    /// 场景保持同样挂接（世界坐标不变）；回池时由 Despawn 统一脱回池根。
+    /// </summary>
+    public GameObject Spawn(GameObject _prefab, Vector3 _position, Quaternion _rotation, Transform _parent)
     {
         if (_prefab == null)
         {
@@ -90,16 +97,29 @@ public class PoolManager : MonoBehaviour
             pools[_prefab] = pool;
         }
 
-        GameObject inst;
-        if (pool.instances.Count > 0)
+        // 容错出队：跳过已被销毁的实例（如挂接的父对象销毁连带回收池中的子特效）
+        GameObject inst = null;
+        while (pool.instances.Count > 0)
         {
-            inst = pool.instances.Dequeue();
+            GameObject candidate = pool.instances.Dequeue();
+            if (candidate != null)   // Unity == 重载：已销毁视为 null
+            {
+                inst = candidate;
+                break;
+            }
         }
-        else
+
+        if (inst == null)
         {
             inst = Instantiate(_prefab);
             inst.transform.SetParent(poolRoot, false);
         }
+
+        // 先挂接（保持世界坐标语义），再显式定位到请求位姿
+        if (_parent != null)
+            inst.transform.SetParent(_parent, true);
+        else
+            inst.transform.SetParent(poolRoot, false);
 
         inst.transform.SetPositionAndRotation(_position, _rotation);
         instanceOwners[inst] = pool;
@@ -115,6 +135,8 @@ public class PoolManager : MonoBehaviour
 
         if (instanceOwners.TryGetValue(_instance, out Pool pool))
         {
+            // 脱回池根：解除动态挂接（命中特效曾挂敌人），避免池持有将随父销毁的引用
+            _instance.transform.SetParent(poolRoot, false);
             _instance.SetActive(false);
             pool.instances.Enqueue(_instance);
         }
@@ -126,5 +148,36 @@ public class PoolManager : MonoBehaviour
             else
                 DestroyImmediate(_instance);
         }
+    }
+
+    // ==================== 延迟归还 ====================
+    // 替代 Instantiate + Destroy(go, delay) 模式（命中特效 0.5 秒生命周期）
+    public void DespawnDelayed(GameObject _instance, float _delay)
+    {
+        if (_instance == null)
+            return;
+
+        if (!instanceOwners.ContainsKey(_instance))
+        {
+            // 非池化实例：保持原生延迟销毁行为
+            Destroy(_instance, _delay);
+            return;
+        }
+
+        StartCoroutine(DelayedDespawnRoutine(_instance, _delay));
+    }
+
+    private System.Collections.IEnumerator DelayedDespawnRoutine(GameObject _instance, float _delay)
+    {
+        yield return new WaitForSeconds(_delay);
+
+        // 延迟期间被父对象销毁连带回收：清理归属记录，不入池
+        if (_instance == null)
+        {
+            instanceOwners.Remove(_instance);
+            yield break;
+        }
+
+        Despawn(_instance);
     }
 }
