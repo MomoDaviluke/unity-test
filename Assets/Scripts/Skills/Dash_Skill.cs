@@ -12,17 +12,17 @@ public class Dash_Skill : Skill
 {
     // ==================== 冲刺解锁 ====================
     [Header("Dash")]
-    [SerializeField] private UI_SKillTreeSlot dashUnlockButton;
+    [SerializeField] private UI_SkillTreeSlot dashUnlockButton;
     public bool dashUnlocked { get; private set; }
 
     // ==================== 冲刺时分身 ====================
     [Header("Clone on dash")]
-    [SerializeField] private UI_SKillTreeSlot cloneOnDashUnlockButton;
+    [SerializeField] private UI_SkillTreeSlot cloneOnDashUnlockButton;
     public bool cloneOmDashUnlocked { get; private set; }
 
     // ==================== 到达时分身 ====================
     [Header("Clone on arrival")]
-    [SerializeField] private UI_SKillTreeSlot cloneOnArrivalUnlockButton;
+    [SerializeField] private UI_SkillTreeSlot cloneOnArrivalUnlockButton;
     public bool cloneOnArrivalUnlocked { get; private set; }
 
     // ==================== 技能使用 ====================

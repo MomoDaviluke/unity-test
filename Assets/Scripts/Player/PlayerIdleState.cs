@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// PlayerIdleState（玩家待机状态）- 继承自PlayGroundedState
+/// PlayerIdleState（玩家待机状态）- 继承自PlayerGroundedState
 /// 功能：玩家静止不动时的状态，检测输入切换到移动/攻击/跳跃等状态
 /// </summary>
-public class PlayerIdleState : PlayGroundedState
+public class PlayerIdleState : PlayerGroundedState
 {
     // ==================== 构造函数 ====================
     public PlayerIdleState(Player _player, PlayerStateMachine _stateMachine, string _animBoolName) : base(_player, _stateMachine, _animBoolName)

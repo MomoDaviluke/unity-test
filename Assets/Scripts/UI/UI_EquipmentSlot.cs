@@ -7,7 +7,7 @@ using UnityEngine.EventSystems;
 /// UI_EquipmentSlot（装备槽位UI）- 继承自物品槽位，专门用于装备
 /// 功能：显示装备、点击卸下装备
 /// </summary>
-public class UI_EquipmentSlot : UI_itemSlot
+public class UI_EquipmentSlot : UI_ItemSlot
 {
     // ==================== 装备类型 ====================
     public EquipmentType slotType;
@@ -26,7 +26,7 @@ public class UI_EquipmentSlot : UI_itemSlot
             Inventory.instance.AddItem(item.data as ItemData_Equipment);
 
             ui.itemTooltip.HideToolTip();
-            CleanUpSloat();
+            CleanUpSlot();
         }
     }
 }

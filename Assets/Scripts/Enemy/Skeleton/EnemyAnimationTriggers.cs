@@ -34,7 +34,7 @@ public class EnemyAnimationTriggers : MonoBehaviour
     }
     private void SpecialAttackTrigger()
     {
-        enemy.AnimationSepcoalAttackTrigger();
+        enemy.AnimationSpecialAttackTrigger();
     }
     private void OpenCountAttackWindow() => enemy.OpenCountAttackWindow();
     private void CloseCountAttackWindow() => enemy.CloseCountAttackWindow();

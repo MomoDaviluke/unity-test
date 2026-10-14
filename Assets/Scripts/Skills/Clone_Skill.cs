@@ -15,23 +15,23 @@ public class Clone_Skill : Skill
     [SerializeField] private float cloneDuration;       // 分身持续时间
 
     [Header("分身攻击")]
-    [SerializeField] private UI_SKillTreeSlot cloneAttackUnlockButton; // 分身攻击解锁按钮
+    [SerializeField] private UI_SkillTreeSlot cloneAttackUnlockButton; // 分身攻击解锁按钮
     [SerializeField] private float cloneAttackMultiplier; // 分身攻击倍率
     [SerializeField] private bool canAttack;            // 是否可以攻击
 
     [Header("侵略性分身")]
-    [SerializeField] private UI_SKillTreeSlot aggressiveCloneUnlockButton; // 侵略性解锁按钮
+    [SerializeField] private UI_SkillTreeSlot aggressiveCloneUnlockButton; // 侵略性解锁按钮
     [SerializeField] private float aggresiveCloneAttackMultiplier; // 侵略性攻击倍率
     public bool canApplyOnHitEffect { get; private set; } // 是否可应用击中效果
 
     [Header("多重分身")]
-    [SerializeField] private UI_SKillTreeSlot multipleUnlockButton; // 多重分身解锁按钮
+    [SerializeField] private UI_SkillTreeSlot multipleUnlockButton; // 多重分身解锁按钮
     [SerializeField] private float multiCloneAttackMultiplier; // 多重攻击倍率
     [SerializeField] private bool canDuplicateClone;    // 是否可以复制分身
     [SerializeField] private float chanceToDuplicate;   // 复制概率
 
     [Header("水晶替换分身")]
-    [SerializeField] private UI_SKillTreeSlot crystalInsteadUnlockButton; // 水晶替换解锁按钮
+    [SerializeField] private UI_SkillTreeSlot crystalInsteadUnlockButton; // 水晶替换解锁按钮
     public bool crystalInsteadOfClone;                  // 是否使用水晶代替分身
 
     /// <summary>

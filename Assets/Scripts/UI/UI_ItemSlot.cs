@@ -4,9 +4,9 @@ using TMPro;
 using UnityEngine.EventSystems;
 
 /// <summary>
-/// UI_itemSlot（物品槽位UI）- 显示物品图标和数量，处理鼠标交互
+/// UI_ItemSlot（物品槽位UI）- 显示物品图标和数量，处理鼠标交互
 /// </summary>
-public class UI_itemSlot : MonoBehaviour, IPointerDownHandler, IPointerEnterHandler, IPointerExitHandler
+public class UI_ItemSlot : MonoBehaviour, IPointerDownHandler, IPointerEnterHandler, IPointerExitHandler
 {
     [SerializeField] protected Image itemImage;
     [SerializeField] protected TextMeshProUGUI itemText;
@@ -24,7 +24,7 @@ public class UI_itemSlot : MonoBehaviour, IPointerDownHandler, IPointerEnterHand
         item = _newItem;
         if (item == null || item.data == null)
         {
-            CleanUpSloat();
+            CleanUpSlot();
             return;
         }
 
@@ -37,7 +37,7 @@ public class UI_itemSlot : MonoBehaviour, IPointerDownHandler, IPointerEnterHand
             itemText.text = "";
     }
 
-    public void CleanUpSloat()
+    public void CleanUpSlot()
     {
         item = null;
         itemImage.sprite = null;

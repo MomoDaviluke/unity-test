@@ -17,28 +17,28 @@ public class Crystal_Skill : Skill
 
     // ==================== 水晶解锁 ====================
     [Header("Crystal simple")]
-    [SerializeField] private UI_SKillTreeSlot unlockCrystalButton;
+    [SerializeField] private UI_SkillTreeSlot unlockCrystalButton;
     public bool crystalUnlocked { get; private set; }
 
     // ==================== 水晶幻影 ====================
     [Header("Crystal mirage")]
-    [SerializeField] private UI_SKillTreeSlot unlockCloneInsteadButton;
+    [SerializeField] private UI_SkillTreeSlot unlockCloneInsteadButton;
     [SerializeField] private bool cloneInsteadOfCrystal; // 克隆代替水晶
 
     // ==================== 爆炸水晶 ====================
     [Header("Explosive crystal")]
-    [SerializeField] private UI_SKillTreeSlot unlockExplosiveButton;
+    [SerializeField] private UI_SkillTreeSlot unlockExplosiveButton;
     [SerializeField] private bool canExplode;
 
     // ==================== 移动水晶 ====================
     [Header("Moving crystal")]
-    [SerializeField] private UI_SKillTreeSlot unlockMovingCrystalButton;
+    [SerializeField] private UI_SkillTreeSlot unlockMovingCrystalButton;
     [SerializeField] private bool canMoveToEnemy;
     [SerializeField] private float moveSpeed;
 
     // ==================== 多重堆栈水晶 ====================
     [Header("Multi stacking crystal")]
-    [SerializeField] private UI_SKillTreeSlot unlockMultiStackButton;
+    [SerializeField] private UI_SkillTreeSlot unlockMultiStackButton;
     [SerializeField] private bool canUseMultiStacks;
     [SerializeField] private int amountOfStacks;
     [SerializeField] private float multiStackCooldown;

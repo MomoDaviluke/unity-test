@@ -70,18 +70,4 @@ public class ShadyBattleState : EnemyState
 
         enemy.moveSpeed = defaultSpeed;
     }
-
-    // ==================== 攻击冷却判定（预留） ====================
-    // 当前Shady没有使用此函数，但保留以备后续扩展
-    private bool CanAttack()
-    {
-        if (Time.time >= enemy.lastTimeAttacked + enemy.attackCooldown)
-        {
-            enemy.attackCooldown = Random.Range(enemy.minAttackCooldown, enemy.maxAttackCooldown);
-            enemy.lastTimeAttacked = Time.time;
-            return true;
-        }
-
-        return false;
-    }
 }

@@ -29,7 +29,7 @@ public class PlayerStats : CharacterStats
         {
             player.SetKnockbackPower(new Vector2(7, 10));
             player.fX.ScreenShake(player.fX.shakeHeightDamage);
-            int randomSound = Random.Range(31, 35);
+            int randomSound = Random.Range(SfxIds.HeavyDamageFirst, SfxIds.HeavyDamageLastExclusive);
             AudioManager.instance.PlaySFX(randomSound, null);
         }
 

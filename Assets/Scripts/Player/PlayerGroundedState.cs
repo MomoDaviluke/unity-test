@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// PlayGroundedState（玩家地面状态基类）- 继承自PlayerState
+/// PlayerGroundedState（玩家地面状态基类）- 继承自PlayerState
 /// 功能：处理所有地面状态的共同逻辑（攻击、技能、跳跃、闪避输入检测）
-/// 子类：PlayerIdleState, PlayerIMoveState
+/// 子类：PlayerIdleState, PlayerMoveState
 /// </summary>
-public class PlayGroundedState : PlayerState
+public class PlayerGroundedState : PlayerState
 {
     // ==================== 构造函数 ====================
-    public PlayGroundedState(Player _player, PlayerStateMachine _stateMachine, string _animBoolName) : base(_player, _stateMachine, _animBoolName)
+    public PlayerGroundedState(Player _player, PlayerStateMachine _stateMachine, string _animBoolName) : base(_player, _stateMachine, _animBoolName)
     {
     }
 

@@ -16,7 +16,7 @@ public class SkillManager : Singleton<SkillManager>
     public Sword_Skill sword { get; private set; }       // 飞剑技能：投掷可召回的剑
     public Blackhole_Skill blackhole { get; private set; } // 黑洞技能：吸引敌人并造成多段伤害
     public Crystal_Skill crystal { get; private set; }   // 水晶技能：放置爆炸水晶
-    public Parry_SKill parry { get; private set; }       // 格挡技能：格挡并反击
+    public Parry_Skill parry { get; private set; }       // 格挡技能：格挡并反击
     public Dodge_Skill dodge { get; private set; }       // 闪避技能：增加闪避率
 
     /// <summary>
@@ -30,7 +30,7 @@ public class SkillManager : Singleton<SkillManager>
         sword = GetComponent<Sword_Skill>();
         blackhole = GetComponent<Blackhole_Skill>();
         crystal = GetComponent<Crystal_Skill>();
-        parry = GetComponent<Parry_SKill>();
+        parry = GetComponent<Parry_Skill>();
         dodge = GetComponent<Dodge_Skill>();
     }
 }

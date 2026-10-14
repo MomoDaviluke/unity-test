@@ -9,7 +9,7 @@ using UnityEngine;
 /// 覆盖：
 /// - InputReader 结构契约：继承 Singleton、键字段全部序列化（Inspector 可改键）、语义读取属性齐全；
 /// - 零硬编码扫描：Player 模块与玩家技能输入链源码不再出现 Input.Get*（KeyCode 集中于 InputReader 一处）；
-/// - 跳跃收敛：PlayGroundedState 不再直判 Space/写缓冲（单一 CanJump 路径），
+/// - 跳跃收敛：PlayerGroundedState 不再直判 Space/写缓冲（单一 CanJump 路径），
 ///   Player.Update 中计时器更新先于状态机驱动；
 /// - partial 拆分：攻击/剑职责在 PlayerCombat，成员名不变；
 /// - Die 事件化：Player 不再引用 SaveManager，SaveManager 订阅 OnPlayerDead；
@@ -61,7 +61,7 @@ public class InputReaderTests
         {
             "Scripts/Player/Player.cs",
             "Scripts/Player/PlayerState.cs",
-            "Scripts/Player/PlayGroundedState.cs",
+            "Scripts/Player/PlayerGroundedState.cs",
             "Scripts/Player/PlayerAirState.cs",
             "Scripts/Player/PlayerJumpState.cs",
             "Scripts/Player/PlayerWallSlideState.cs",
@@ -89,7 +89,7 @@ public class InputReaderTests
     [Test]
     public void GroundedState_NoDirectSpaceCheck_OnlyCanJump()
     {
-        string source = Read("Scripts/Player/PlayGroundedState.cs");
+        string source = Read("Scripts/Player/PlayerGroundedState.cs");
         Assert.IsFalse(source.Contains("KeyCode.Space"),
             "地面状态不得再直判 Space（跳跃统一经 Player.CanJump 单一查询）");
         Assert.IsFalse(source.Contains("jumpBufferTimer ="),
@@ -139,7 +139,7 @@ public class InputReaderTests
         Assert.IsFalse(player.Contains("SaveManager.instance"),
             "Player 不应直接调用 SaveManager（死亡存档由 OnPlayerDead 事件驱动）");
 
-        string saveManager = Read("Scripts/Save and Load/SaveManager.cs");
+        string saveManager = Read("Scripts/SaveAndLoad/SaveManager.cs");
         Assert.IsTrue(saveManager.Contains("GameEvents.OnPlayerDead += SaveGame"),
             "SaveManager 应订阅 OnPlayerDead 自动存档");
     }

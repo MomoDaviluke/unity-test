@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// PlayDashState（玩家冲刺状态）- 继承自PlayerState
+/// PlayerDashState（玩家冲刺状态）- 继承自PlayerState
 /// 功能：快速水平位移并无敌，可穿越敌人
 /// 设计思路：冲刺期间锁定垂直速度，提供短暂无敌帧
 /// </summary>
-public class PlayDashState : PlayerState
+public class PlayerDashState : PlayerState
 {
     // ==================== 构造函数 ====================
-    public PlayDashState(Player _player, PlayerStateMachine _stateMachine, string _animBoolName) : base(_player, _stateMachine, _animBoolName)
+    public PlayerDashState(Player _player, PlayerStateMachine _stateMachine, string _animBoolName) : base(_player, _stateMachine, _animBoolName)
     {
     }
 

@@ -303,7 +303,7 @@ public class CharacterStats : MonoBehaviour
             {
                 if (GetComponent<Player>() != null)
                     return;
-                HieNearestTargetWithShockStrike();
+                HitNearestTargetWithShockStrike();
             }
         }
     }
@@ -318,7 +318,7 @@ public class CharacterStats : MonoBehaviour
         fx.ShockFxFor(ailmentsDuration);
     }
 
-    private void HieNearestTargetWithShockStrike()
+    private void HitNearestTargetWithShockStrike()
     {
         Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, 20);
 

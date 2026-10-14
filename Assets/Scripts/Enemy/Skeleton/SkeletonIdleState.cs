@@ -29,6 +29,6 @@ public class SkeletonIdleState : EnemyIdleStateBase
 
     protected override void OnExitExtra()
     {
-        AudioManager.instance.PlaySFX(24, skeleton.transform);
+        AudioManager.instance.PlaySFX(SfxIds.EnemyIdleRoar, skeleton.transform);
     }
 }

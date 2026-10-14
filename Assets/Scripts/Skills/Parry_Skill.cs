@@ -7,23 +7,23 @@ using UnityEngine.UI;
 /// Parry_Skill（反击技能）- 继承自Skill
 /// 功能：反击姿态，成功反击时恢复生命并创建幻影分身
 /// </summary>
-public class Parry_SKill : Skill
+public class Parry_Skill : Skill
 {
     // ==================== 反击解锁 ====================
     [Header("反击")]
-    [SerializeField] private UI_SKillTreeSlot parryUnlockButton;
+    [SerializeField] private UI_SkillTreeSlot parryUnlockButton;
     public bool parryUnlocked { get; private set; }
 
     // ==================== 反击恢复 ====================
     [Header("反击恢复")]
-    [SerializeField] private UI_SKillTreeSlot restorUnlockButton;
+    [SerializeField] private UI_SkillTreeSlot restorUnlockButton;
     [Range(0f, 1f)]
     [SerializeField] private float restoreHealthPercentage;
     public bool restorUnlocked { get; private set; }
 
     // ==================== 格挡幻影 ====================
     [Header("格挡幻影")]
-    [SerializeField] private UI_SKillTreeSlot parrtWithMirageUnlockButton;
+    [SerializeField] private UI_SkillTreeSlot parrtWithMirageUnlockButton;
     public bool parrtWithMirageUnlocked { get; private set; }
 
     // ==================== 技能使用 ====================

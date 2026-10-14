@@ -1,10 +1,10 @@
 using UnityEngine;
 
 /// <summary>
-/// PlayCounterAttackState（玩家反击状态）- 继承自PlayerState
+/// PlayerCounterAttackState（玩家反击状态）- 继承自PlayerState
 /// 功能：进入反击姿态，检测范围内敌人的可眩晕攻击并进行反击
 /// </summary>
-public class PlayCounterAttackState : PlayerState
+public class PlayerCounterAttackState : PlayerState
 {
     // ==================== 反击参数 ====================
     private bool canCreateClone; // 是否可创建反击分身
@@ -15,7 +15,7 @@ public class PlayCounterAttackState : PlayerState
     private readonly Collider2D[] counterOverlapBuffer = new Collider2D[32];
 
     // ==================== 构造函数 ====================
-    public PlayCounterAttackState(Player _player, PlayerStateMachine _stateMachine, string _animBoolName) : base(_player, _stateMachine, _animBoolName)
+    public PlayerCounterAttackState(Player _player, PlayerStateMachine _stateMachine, string _animBoolName) : base(_player, _stateMachine, _animBoolName)
     {
     }
 

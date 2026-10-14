@@ -23,6 +23,6 @@ public class ArcherIdleState : EnemyIdleStateBase
     // ==================== 弓箭手特有逻辑 ====================
     protected override void OnExitExtra()
     {
-        AudioManager.instance.PlaySFX(24, archer.transform);
+        AudioManager.instance.PlaySFX(SfxIds.EnemyIdleRoar, archer.transform);
     }
 }
