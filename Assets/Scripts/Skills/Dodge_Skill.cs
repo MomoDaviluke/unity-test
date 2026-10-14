@@ -43,9 +43,8 @@ public class Dodge_Skill : Skill
         {
             if (player != null && player.stats != null)
             {
+                // Phase 3：Stat 变化经 onStatsChanged 自动通知属性面板，无需显式广播
                 player.stats.evasion.AddModifier(evasionAmount);
-                // Phase 3 解耦：属性变化经事件总线广播，UI 侧订阅刷新（原直接调 Inventory.UpdateStatsUI）
-                GameEvents.InventoryUpdated();
             }
             dodgeUnlocked = true;
         }

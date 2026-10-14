@@ -81,13 +81,42 @@ public class CharacterStats : MonoBehaviour
     [SerializeField] public int currentHealth;
     public System.Action onHealthChanged;
 
+    // Phase 3：属性变化事件——任意 Stat 的修饰符/基础值变化（装备穿卸、Buff 生效/到期、技能加成）
+    // 经 Awake 统一绑定后自动广播，UI_StatSlot 等订阅方无需轮询或依赖调用方手动通知
+    public System.Action onStatsChanged;
+
     public bool isDead { get; protected set; }
     public bool isInvincible { get; protected set; }
     private bool isVulnerable;
 
     // ==================== 生命周期方法 ====================
+    // Awake绑定所有Stat的变化回调（lambda 读取最新 onStatsChanged，订阅时机不受绑定顺序影响）
     // Start初始化暴击倍率默认值和生命值，获取特效组件
     // Update管理状态异常计时器，点燃伤害按固定间隔触发
+
+    protected virtual void Awake()
+    {
+        BindStat(strength);
+        BindStat(agility);
+        BindStat(intelligence);
+        BindStat(vitality);
+        BindStat(damage);
+        BindStat(critChance);
+        BindStat(critpower);
+        BindStat(maxHealth);
+        BindStat(armor);
+        BindStat(evasion);
+        BindStat(magicResistance);
+        BindStat(fireDamage);
+        BindStat(iceDamage);
+        BindStat(lightningDamage);
+    }
+
+    private void BindStat(Stat _stat)
+    {
+        if (_stat != null)
+            _stat.onChanged = () => onStatsChanged?.Invoke();
+    }
 
     protected virtual void Start()
     {

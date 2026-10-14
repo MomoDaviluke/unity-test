@@ -17,6 +17,9 @@ public class UI_StatSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     [SerializeField] private TextMeshProUGUI statValueText;
     [SerializeField] private TextMeshProUGUI statNameText;
 
+    // Phase 3：属性变化订阅目标（装备/Buff/技能修改任意 Stat 时自动刷新本槽）
+    private PlayerStats subscribedStats;
+
     [TextArea]
     [SerializeField] private string statDescription;
 
@@ -36,6 +39,27 @@ public class UI_StatSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     {
         UpdateStatValueUI();
         ui = GetComponentInParent<UI>();
+    }
+
+    // ==================== 事件订阅 ====================
+    // 角色面板打开时激活并订阅（面板关闭时不订阅、不刷新；重新打开由 Start 拉初值，行为等价）
+    private void OnEnable()
+    {
+        if (PlayerManager.instance == null || PlayerManager.instance.player == null)
+            return;
+
+        subscribedStats = PlayerManager.instance.player.GetComponent<PlayerStats>();
+        if (subscribedStats != null)
+            subscribedStats.onStatsChanged += UpdateStatValueUI;
+    }
+
+    private void OnDisable()
+    {
+        if (subscribedStats != null)
+        {
+            subscribedStats.onStatsChanged -= UpdateStatValueUI;
+            subscribedStats = null;
+        }
     }
 
     // ==================== 属性值更新 ====================
