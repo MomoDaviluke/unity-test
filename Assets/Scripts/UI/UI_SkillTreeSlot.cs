@@ -4,10 +4,10 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 /// <summary>
-/// UI_SKillTreeSlot（技能树槽位UI）- 显示技能、处理解锁逻辑
+/// UI_SkillTreeSlot（技能树槽位UI）- 显示技能、处理解锁逻辑
 /// 功能：技能显示、前置条件检查、金币消耗解锁、存档/加载
 /// </summary>
-public class UI_SKillTreeSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, ISaveManager
+public class UI_SkillTreeSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, ISaveManager
 {
     // ==================== 核心引用 ====================
     private UI ui;
@@ -22,8 +22,8 @@ public class UI_SKillTreeSlot : MonoBehaviour, IPointerEnterHandler, IPointerExi
     public bool unlocked;
 
     // ==================== 解锁条件 ====================
-    [SerializeField] private UI_SKillTreeSlot[] shouldBeUnlocked;
-    [SerializeField] private UI_SKillTreeSlot[] shouldBeLocked;
+    [SerializeField] private UI_SkillTreeSlot[] shouldBeUnlocked;
+    [SerializeField] private UI_SkillTreeSlot[] shouldBeLocked;
 
     // ==================== 编辑器验证 ====================
     private void OnValidate()

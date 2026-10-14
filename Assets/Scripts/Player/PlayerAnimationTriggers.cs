@@ -12,7 +12,7 @@ public class PlayerAnimationTriggers : MonoBehaviour
 
     private void AttackTrigger()
     {
-        AudioManager.instance.PlaySFX(2, null);
+        AudioManager.instance.PlaySFX(SfxIds.AttackSwing, null);
         if (player == null || player.attackCheck == null)
             return;
 

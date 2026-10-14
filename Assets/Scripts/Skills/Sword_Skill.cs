@@ -26,20 +26,20 @@ public class Sword_Skill : Skill
 
     // ==================== 反弹模式参数 ====================
     [Header("反弹模式")]
-    [SerializeField] private UI_SKillTreeSlot bounceUnlockButton;
+    [SerializeField] private UI_SkillTreeSlot bounceUnlockButton;
     [SerializeField] private int bounceAmount;
     [SerializeField] private float bounceGravity;
     [SerializeField] private float bounceSpeed;
 
     // ==================== 穿透模式参数 ====================
     [Header("穿透模式")]
-    [SerializeField] private UI_SKillTreeSlot pierceUnlockButton;
+    [SerializeField] private UI_SkillTreeSlot pierceUnlockButton;
     [SerializeField] private int pierceAmount;
     [SerializeField] private float pierceGravity;
 
     // ==================== 旋转模式参数 ====================
     [Header("旋转模式")]
-    [SerializeField] private UI_SKillTreeSlot spinUnlockButton;
+    [SerializeField] private UI_SkillTreeSlot spinUnlockButton;
     [SerializeField] private float hitCooldown = .35f;
     [SerializeField] private float maxTravelDistance = 7;
     [SerializeField] private float spinDuration = 2;
@@ -47,7 +47,7 @@ public class Sword_Skill : Skill
 
     // ==================== 技能基础参数 ====================
     [Header("技能参数")]
-    [SerializeField] private UI_SKillTreeSlot swordUnlockButton;
+    [SerializeField] private UI_SkillTreeSlot swordUnlockButton;
     public bool swordUnlocked { get; private set; }
     [SerializeField] private GameObject swordPrefab;
     [SerializeField] private Vector2 launchForce;
@@ -57,9 +57,9 @@ public class Sword_Skill : Skill
 
     // ==================== 被动技能 ====================
     [Header("被动技能")]
-    [SerializeField] private UI_SKillTreeSlot timeStopUnlockButton;
+    [SerializeField] private UI_SkillTreeSlot timeStopUnlockButton;
     public bool timeStopUnlocked { get; private set; }
-    [SerializeField] private UI_SKillTreeSlot volnurableUnlockButton;
+    [SerializeField] private UI_SkillTreeSlot volnurableUnlockButton;
     public bool volnurableUnlocked { get; private set; }
 
     // ==================== 瞄准系统 ====================

@@ -9,18 +9,20 @@ using UnityEngine;
 /// </summary>
 public class UI_ToolTip : MonoBehaviour
 {
-    // ==================== 位置限制参数 ====================
-    [SerializeField] private float xLimit = 960;
-    [SerializeField] private float yLimit = 540;
-
+    // ==================== 位置偏移参数 ====================
     [SerializeField] private float xOffset = 150;
     [SerializeField] private float yOffset = 150;
 
     // ==================== 位置调整 ====================
-    // 根据鼠标位置在屏幕上的位置，决定提示框的偏移方向
+    // 根据鼠标位置在屏幕上的位置，决定提示框偏移方向
+    // 翻转阈值运行时读取物理屏幕尺寸的一半：Input.mousePosition 是物理像素坐标，
+    // 原先序列化的固定 960/540 只在 1920×1080 下正确，其他分辨率会误判半屏
     public virtual void AdjustPosition()
     {
         Vector2 mousePosition = Input.mousePosition;
+
+        float xLimit = Screen.width * .5f;
+        float yLimit = Screen.height * .5f;
 
         float newxOffset = 0;
         float newyOffset = 0;

@@ -18,16 +18,16 @@ public class UI_InventoryPresenter : MonoBehaviour
     [SerializeField] private Transform statSlotParent;
 
     // ==================== 槽位组件缓存 ====================
-    private UI_itemSlot[] inventoryItemSlot;
-    private UI_itemSlot[] stashItemSlot;
+    private UI_ItemSlot[] inventoryItemSlot;
+    private UI_ItemSlot[] stashItemSlot;
     private UI_EquipmentSlot[] equipmentSlot;
     private UI_StatSlot[] statSlot;
 
     // ==================== 初始化 ====================
     void Start()
     {
-        inventoryItemSlot = inventorySlotParent.GetComponentsInChildren<UI_itemSlot>();
-        stashItemSlot = stashSloatParent.GetComponentsInChildren<UI_itemSlot>();
+        inventoryItemSlot = inventorySlotParent.GetComponentsInChildren<UI_ItemSlot>();
+        stashItemSlot = stashSloatParent.GetComponentsInChildren<UI_ItemSlot>();
         equipmentSlot = equipmentSlotParent.GetComponentsInChildren<UI_EquipmentSlot>();
         statSlot = statSlotParent.GetComponentsInChildren<UI_StatSlot>();
 
@@ -59,7 +59,7 @@ public class UI_InventoryPresenter : MonoBehaviour
 
         // 清空装备槽
         for (int i = 0; i < equipmentSlot.Length; i++)
-            equipmentSlot[i].CleanUpSloat();
+            equipmentSlot[i].CleanUpSlot();
 
         // 更新装备槽
         for (int i = 0; i < equipmentSlot.Length; i++)
@@ -73,9 +73,9 @@ public class UI_InventoryPresenter : MonoBehaviour
 
         // 清空背包和仓库槽
         for (int i = 0; i < inventoryItemSlot.Length; i++)
-            inventoryItemSlot[i].CleanUpSloat();
+            inventoryItemSlot[i].CleanUpSlot();
         for (int i = 0; i < stashItemSlot.Length; i++)
-            stashItemSlot[i].CleanUpSloat();
+            stashItemSlot[i].CleanUpSlot();
 
         // 更新背包槽
         for (int i = 0; i < inv.inventory.Count && i < inventoryItemSlot.Length; i++)

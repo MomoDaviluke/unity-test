@@ -63,7 +63,7 @@ public class ArcherBattleState : EnemyBattleStateBase
     private bool CanJump()
     {
         // 安全检查：身后无地面或有墙壁时不允许后跳
-        if (archer.GroundBenhundCheck() == false || archer.WallBehind() == true)
+        if (archer.GroundBehindCheck() == false || archer.WallBehind() == true)
             return false;
 
         if (Time.time >= archer.lastTimeJumped + archer.jumpCooldown)

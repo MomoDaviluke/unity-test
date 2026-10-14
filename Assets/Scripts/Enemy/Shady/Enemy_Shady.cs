@@ -75,7 +75,7 @@ public class Enemy_Shady : Enemy
     // ==================== 特殊攻击：自爆 ====================
     // 由动画事件调用：生成爆炸物并设置参数，同时禁用碰撞和重力
     // 这是Shady的核心机制：接近玩家后自爆造成范围伤害
-    public override void AnimationSepcoalAttackTrigger()
+    public override void AnimationSpecialAttackTrigger()
     {
         GameObject newExplosive = Instantiate(explosivePrefab, attackCheck.position, Quaternion.identity);
         newExplosive.GetComponent<Explosive_Controller>().SetupExplosive(stats, growSpeed, maxSize, attackCheckRadius);

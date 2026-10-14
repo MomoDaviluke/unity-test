@@ -235,7 +235,7 @@ public class Enemy : Entity
     /// <summary>
     /// 特殊攻击触发：子类重写实现特殊攻击逻辑
     /// </summary>
-    public virtual void AnimationSepcoalAttackTrigger() { }
+    public virtual void AnimationSpecialAttackTrigger() { }
 
     // ==================== 玩家检测与伤害计算 ====================
     // IsPlayerDetected使用射线检测前方是否有玩家，检测距离50单位

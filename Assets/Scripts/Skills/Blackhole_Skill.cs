@@ -10,7 +10,7 @@ using UnityEngine.UI;
 public class Blackhole_Skill : Skill
 {
     // ==================== 解锁与配置 ====================
-    [SerializeField] private UI_SKillTreeSlot blackHoleUnlockButton;
+    [SerializeField] private UI_SkillTreeSlot blackHoleUnlockButton;
     public bool blackHoleUnlocked { get; private set; }
     [SerializeField] private int amountOfAttacks;
     [SerializeField] private float cloneCooldown;
@@ -60,7 +60,7 @@ public class Blackhole_Skill : Skill
         currentBlackhole = newBlackHole.GetComponent<Blackhole_skill_controller>();
         currentBlackhole.SetupBlackhole(maxSize, growSpeed, shrinkSpeed, amountOfAttacks, cloneCooldown, blackholeDuration);
 
-        AudioManager.instance.PlaySFX(3, transform);
+        AudioManager.instance.PlaySFX(SfxIds.Blackhole, transform);
     }
 
     protected override void Update()

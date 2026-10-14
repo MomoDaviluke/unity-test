@@ -86,7 +86,7 @@ public class UI_InGame : MonoBehaviour
     // 灵魂值平滑增长、检测技能按键、更新冷却
     void Update()
     {
-        UpdataSoulsUI();
+        UpdateSoulsUI();
 
         // 检测技能按键，设置冷却（Phase 5 补充：全部经 InputReader 语义读取，
         // 与玩家动作同源——Inspector 改键后图标跟随，不再各自硬编码）
@@ -116,7 +116,7 @@ public class UI_InGame : MonoBehaviour
 
     // ==================== 灵魂值显示 ====================
     // 平滑增长显示灵魂值（目标值由事件推送，此处仅做动画插值）
-    private void UpdataSoulsUI()
+    private void UpdateSoulsUI()
     {
         if (soulsAmount < soulsTarget)
             soulsAmount += increaseRate * Time.deltaTime;

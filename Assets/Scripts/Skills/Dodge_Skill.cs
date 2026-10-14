@@ -12,13 +12,13 @@ public class Dodge_Skill : Skill
 {
     // ==================== 闪避解锁 ====================
     [Header("闪避")]
-    [SerializeField] private UI_SKillTreeSlot unlockDodgeButton;
+    [SerializeField] private UI_SkillTreeSlot unlockDodgeButton;
     [SerializeField] private int evasionAmount;
     public bool dodgeUnlocked;
 
     // ==================== 闪避幻影 ====================
     [Header("躲避幻影")]
-    [SerializeField] private UI_SKillTreeSlot unlockMirageDodge;
+    [SerializeField] private UI_SkillTreeSlot unlockMirageDodge;
     public bool dodgeMirageUnlocked;
 
     // ==================== 初始化与解锁 ====================

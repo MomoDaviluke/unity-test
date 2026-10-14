@@ -8,7 +8,7 @@ using UnityEngine.EventSystems;
 /// UI_CraftSlot（合成槽位UI）- 继承自物品槽位，显示可合成装备
 /// 功能：设置合成装备信息、点击打开合成窗口
 /// </summary>
-public class UI_CraftSlot : UI_itemSlot
+public class UI_CraftSlot : UI_ItemSlot
 {
     // ==================== 初始化 ====================
     protected override void Start()

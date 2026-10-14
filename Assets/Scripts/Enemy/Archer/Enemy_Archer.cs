@@ -98,7 +98,7 @@ public class Enemy_Archer : Enemy
     // ==================== 射箭攻击 ====================
     // 由动画事件调用：生成箭矢并设置速度和伤害
     // 箭矢方向与敌人面朝方向一致
-    public override void AnimationSepcoalAttackTrigger()
+    public override void AnimationSpecialAttackTrigger()
     {
         GameObject newArrow = Instantiate(arrowPrefab, attackCheck.position, Quaternion.identity);
 
@@ -106,9 +106,9 @@ public class Enemy_Archer : Enemy
     }
 
     // ==================== 环境检测方法 ====================
-    // GroundBenhundCheck: 检测身后是否有地面（后跳安全检查）
+    // GroundBehindCheck: 检测身后是否有地面（后跳安全检查）
     // WallBehind: 检测身后是否有墙壁（后跳安全检查）
-    public bool GroundBenhundCheck() => Physics2D.BoxCast(groundBehindCheck.position, groundBehindCheckSize, 0, Vector2.zero, 0, isGround);
+    public bool GroundBehindCheck() => Physics2D.BoxCast(groundBehindCheck.position, groundBehindCheckSize, 0, Vector2.zero, 0, isGround);
 
     public bool WallBehind() => Physics2D.Raycast(wallCheck.position, Vector2.right * -facingDir, wallCheckDistance + 2, isGround);
 

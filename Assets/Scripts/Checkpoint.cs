@@ -38,7 +38,7 @@ public class Checkpoint : MonoBehaviour
     {
         if (activationStatus == false)
         {
-            AudioManager.instance.PlaySFX(5, transform);
+            AudioManager.instance.PlaySFX(SfxIds.Checkpoint, transform);
 
             if (GameManager.instance != null)
                 GameManager.instance.SetLastActivatedCheckpoint(id);

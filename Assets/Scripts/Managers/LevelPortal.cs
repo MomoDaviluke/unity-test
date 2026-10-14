@@ -64,7 +64,7 @@ public class LevelPortal : MonoBehaviour
         if (AudioManager.instance != null)
         {
             Debug.Log("[LevelPortal] 播放音效");
-            AudioManager.instance.PlaySFX(10, transform);
+            AudioManager.instance.PlaySFX(SfxIds.Portal, transform);
         }
         else
         {

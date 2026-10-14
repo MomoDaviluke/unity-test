@@ -19,8 +19,8 @@ public partial class Player : Entity
     public float acceleration = 10f;                    // 移动加速度（值越大，从静止到全速越快）
     public float deceleration = 10f;                    // 移动减速度（值越大，松手后停下越快）
     public float airControlMultiplier = 0.8f;           // 空中控制倍率（空中只能发挥80%的移速，模拟惯性）
-    private float defualtMoveSpeed;                     // 默认移动速度（被减速后用于恢复）
-    private float defualtJumpForce;                     // 默认跳跃力度（被减速后用于恢复）
+    private float defaultMoveSpeed;                     // 默认移动速度（被减速后用于恢复）
+    private float defaultJumpForce;                     // 默认跳跃力度（被减速后用于恢复）
 
     // ==================== 跳跃优化系统 ====================
     // 土狼时间（Coyote Time）：离开平台后短暂时间内仍可跳跃，防止边缘掉落 frustration
@@ -59,14 +59,14 @@ public partial class Player : Entity
     #region States
     public PlayerStateMachine stateMachine { get; private set; }
     public PlayerIdleState idleState { get; private set; }
-    public PlayerIMoveState moveState { get; private set; }
+    public PlayerMoveState moveState { get; private set; }
     public PlayerJumpState jumpState { get; private set; }
     public PlayerAirState airState { get; private set; }
-    public PlayDashState dashState { get; private set; }
+    public PlayerDashState dashState { get; private set; }
     public PlayerWallJumpState wallJumpState { get; private set; }
     public PlayerWallSlideState wallSlideState { get; private set; }
     public PlayerPrimaryAttackState primaryAttackState { get; private set; }
-    public PlayCounterAttackState counterAttackState { get; private set; }
+    public PlayerCounterAttackState counterAttackState { get; private set; }
     public PlayerAimSwordState aimSowrd { get; private set; }
     public PlayerCatchSwordState catchSword { get; private set; }
     public PlayerBlackholeState blackhole { get; private set; }
@@ -88,15 +88,15 @@ public partial class Player : Entity
         base.Awake();
         stateMachine = new PlayerStateMachine();
         idleState = new PlayerIdleState(this, stateMachine, "Idle");
-        moveState = new PlayerIMoveState(this, stateMachine, "Move");
+        moveState = new PlayerMoveState(this, stateMachine, "Move");
         jumpState = new PlayerJumpState(this, stateMachine, "Jump");
         airState = new PlayerAirState(this, stateMachine, "Jump");
-        dashState = new PlayDashState(this, stateMachine, "Dash");
+        dashState = new PlayerDashState(this, stateMachine, "Dash");
         wallSlideState = new PlayerWallSlideState(this, stateMachine, "WallSlide");
         wallJumpState = new PlayerWallJumpState(this, stateMachine, "Jump");
 
         primaryAttackState = new PlayerPrimaryAttackState(this, stateMachine, "Attack");
-        counterAttackState = new PlayCounterAttackState(this, stateMachine, "CounterAttack");
+        counterAttackState = new PlayerCounterAttackState(this, stateMachine, "CounterAttack");
 
         aimSowrd = new PlayerAimSwordState(this, stateMachine, "AimSword");
         catchSword = new PlayerCatchSwordState(this, stateMachine, "CatchSword");
@@ -117,8 +117,8 @@ public partial class Player : Entity
         skill = SkillManager.instance;
 
         stateMachine.Initialize(idleState);
-        defualtMoveSpeed = moveSpeed;
-        defualtJumpForce = jumpForce;
+        defaultMoveSpeed = moveSpeed;
+        defaultJumpForce = jumpForce;
         defaultDashSpeed = dashSpeed;
     }
 
@@ -139,7 +139,7 @@ public partial class Player : Entity
         UpdateJumpBuffer();
 
         stateMachine.currentState.Update();
-        checkForDashInput();
+        CheckForDashInput();
 
         if (InputReader.instance.CrystalPressed && skill.crystal.crystalUnlocked)
             skill.crystal.CanUseSkill();
@@ -213,8 +213,8 @@ public partial class Player : Entity
     protected override void ReturnDefaultSpeed()
     {
         base.ReturnDefaultSpeed();
-        moveSpeed = defualtMoveSpeed;
-        jumpForce = defualtJumpForce;
+        moveSpeed = defaultMoveSpeed;
+        jumpForce = defaultJumpForce;
         dashSpeed = defaultDashSpeed;
     }
 
@@ -233,7 +233,7 @@ public partial class Player : Entity
     /// <summary>
     /// 检测冲刺输入 - 经 InputReader 读取，检查解锁状态、墙壁检测、冷却和方向
     /// </summary>
-    private void checkForDashInput()
+    private void CheckForDashInput()
     {
         if (skill.dash.dashUnlocked == false)
             return;
