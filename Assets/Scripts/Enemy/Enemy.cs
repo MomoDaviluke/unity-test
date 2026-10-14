@@ -241,10 +241,24 @@ public class Enemy : Entity
     // IsPlayerDetected使用射线检测前方是否有玩家，检测距离50单位
     // DamagePlayer计算总伤害（物理+元素）并应用到玩家，同时记录伤害来源
 
+    // Phase 6 射线降频：战斗状态单帧内多次调用（Skeleton 2次/Archer·DeathBringer 3次），
+    // 按帧缓存射线结果——同一 Update 内敌人位姿与朝向不变（Flip 均发生在检测之后），
+    // 缓存与逐次射线行为等价；跨帧自动失效（Time.frameCount 比对）。
+    private int playerDetectFrame = -1;
+    private RaycastHit2D playerDetectResult;
+
     /// <summary>
-    /// 检测前方是否有玩家：向前发射射线检测
+    /// 检测前方是否有玩家：向前发射射线检测（同帧结果缓存复用）
     /// </summary>
-    public virtual RaycastHit2D IsPlayerDetected() => Physics2D.Raycast(groundCheck.position, Vector2.right * facingDir, 50, isPlayer);
+    public virtual RaycastHit2D IsPlayerDetected()
+    {
+        if (playerDetectFrame != Time.frameCount)
+        {
+            playerDetectFrame = Time.frameCount;
+            playerDetectResult = Physics2D.Raycast(groundCheck.position, Vector2.right * facingDir, 50, isPlayer);
+        }
+        return playerDetectResult;
+    }
 
     /// <summary>
     /// 对玩家造成伤害：计算总伤害并应用到玩家
