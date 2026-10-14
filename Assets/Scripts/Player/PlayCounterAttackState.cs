@@ -9,6 +9,11 @@ public class PlayCounterAttackState : PlayerState
     // ==================== 反击参数 ====================
     private bool canCreateClone; // 是否可创建反击分身
 
+    // ==================== NonAlloc 缓冲 ====================
+    // Phase 6：反击窗口每帧检测，OverlapCircleAll 每帧分配数组 → 改 NonAlloc 复用缓冲。
+    // 反击半径小（attackCheckRadius），32 个碰撞体足够；超出部分截断仅影响极端堆叠场景。
+    private readonly Collider2D[] counterOverlapBuffer = new Collider2D[32];
+
     // ==================== 构造函数 ====================
     public PlayCounterAttackState(Player _player, PlayerStateMachine _stateMachine, string _animBoolName) : base(_player, _stateMachine, _animBoolName)
     {
@@ -40,10 +45,12 @@ public class PlayCounterAttackState : PlayerState
         player.SetZeroVelocity();
 
         // ---- 反击检测 ----
-        // 检测攻击范围内的所有碰撞体
-        Collider2D[] colliders = Physics2D.OverlapCircleAll(player.attackCheck.position, player.attackCheckRadius);
-        foreach (var hit in colliders)
+        // 检测攻击范围内的所有碰撞体（NonAlloc：复用缓冲，消除每帧数组分配）
+        int hitCount = Physics2D.OverlapCircleNonAlloc(player.attackCheck.position, player.attackCheckRadius, counterOverlapBuffer);
+        for (int i = 0; i < hitCount; i++)
         {
+            Collider2D hit = counterOverlapBuffer[i];
+
             // 反击箭矢：翻转箭矢方向
             if (hit.GetComponent<Arrow_Controller>() != null)
             {

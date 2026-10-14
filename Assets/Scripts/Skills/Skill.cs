@@ -16,6 +16,13 @@ public class Skill : MonoBehaviour
     public float cooldown;          // 技能冷却时间（秒）：两次释放之间的最小间隔
     public float cooldownTimer;     // 当前冷却计时器：<=0时表示技能可用
 
+    // Phase 6：敌人搜索半径按技能配置（默认 25 与原硬编码一致，行为不变）
+    [Header("检测")]
+    [SerializeField] private float enemySearchRadius = 25;
+
+    // NonAlloc 复用缓冲（半径 25 内碰撞体数量有限，128 足够；超出截断仅极端堆叠场景）
+    private readonly Collider2D[] enemySearchBuffer = new Collider2D[128];
+
     // ==================== 玩家引用 ====================
     // player通过PlayerManager单例获取，子类使用它来获取玩家位置、状态等信息
     protected Player player;        // 玩家引用：用于获取玩家位置和状态
@@ -74,23 +81,26 @@ public class Skill : MonoBehaviour
     public virtual void UseSkill() { }
 
     // ==================== 辅助方法：查找最近敌人 ====================
-    // 使用Physics2D.OverlapCircleAll进行范围检测，遍历所有碰撞体找到最近的Enemy
+    // NonAlloc 范围检测，遍历命中碰撞体找到最近的 Enemy
     // 用于追踪类技能（飞剑返回、分身攻击目标选择等）
 
     /// <summary>
     /// 查找最近的敌人：用于追踪类技能（如飞剑、分身攻击）
+    /// Phase 6：OverlapCircleAll 每次分配数组 → NonAlloc 复用缓冲；半径改为可配置（默认 25 等价）
     /// </summary>
     /// <param name="_checkTransform">检测中心点</param>
     /// <returns>最近敌人的Transform，如果没有则返回null</returns>
     protected virtual Transform FindClosestEnemy(Transform _checkTransform)
     {
-        Collider2D[] colliders = Physics2D.OverlapCircleAll(_checkTransform.position, 25); // 检测半径25范围内的所有碰撞体
+        int hitCount = Physics2D.OverlapCircleNonAlloc(_checkTransform.position, enemySearchRadius, enemySearchBuffer);
         float closestDistance = Mathf.Infinity;
         Transform closesEnemy = null;
 
-        // 遍历所有碰撞体，找到距离最近的敌人
-        foreach (var hit in colliders)
+        // 遍历命中的碰撞体，找到距离最近的敌人
+        for (int i = 0; i < hitCount; i++)
         {
+            Collider2D hit = enemySearchBuffer[i];
+
             if (hit.GetComponent<Enemy>() != null)
             {
                 float distanceToEnemy = Vector2.Distance(_checkTransform.position, hit.transform.position);

@@ -29,40 +29,52 @@ public class TutorialTrigger : MonoBehaviour
     [SerializeField] private bool playerInTrigger = false;
 
     // ==================== 初始化 ====================
+    // Phase 6：Update 每帧 OverlapCircleAll 轮询 → 物理触发回调。
+    // 宿主对象原无 Collider（6 个场景实例），运行时自动挂接触发圆，零场景资产改动；
+    // 初始重叠会在首个物理帧触发 OnTriggerEnter2D，与轮询的"开局即在区域内"行为等价。
+    private void Awake()
+    {
+        CircleCollider2D col = gameObject.AddComponent<CircleCollider2D>();
+        col.radius = triggerRadius;
+        col.isTrigger = true;
+    }
+
     private void Start()
     {
         if (showOnlyOnce && TutorialManager.instance != null)
             hasShown = TutorialManager.instance.HasShownTutorial(tutorialId);
     }
 
-    // ==================== 区域检测 ====================
-    private void Update()
+    // ==================== 触发回调 ====================
+    private void OnTriggerEnter2D(Collider2D collision)
     {
         if (hasShown && showOnlyOnce)
             return;
 
-        Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, triggerRadius, playerLayer);
-        bool currentPlayerInTrigger = false;
+        if (collision.GetComponent<Player>() == null)
+            return;
 
-        foreach (var hit in hits)
-        {
-            if (hit.GetComponent<Player>() != null)
-            {
-                currentPlayerInTrigger = true;
-                break;
-            }
-        }
+        if (playerInTrigger)
+            return;
 
-        if (currentPlayerInTrigger && !playerInTrigger)
-        {
-            playerInTrigger = true;
-            ShowTutorial();
-        }
-        else if (!currentPlayerInTrigger && playerInTrigger)
-        {
-            playerInTrigger = false;
-            HideTutorial();
-        }
+        playerInTrigger = true;
+        ShowTutorial();
+    }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        // 与原 Update 早退一致：只显示一次且已显示后，离开区域不再触发隐藏
+        if (hasShown && showOnlyOnce)
+            return;
+
+        if (collision.GetComponent<Player>() == null)
+            return;
+
+        if (!playerInTrigger)
+            return;
+
+        playerInTrigger = false;
+        HideTutorial();
     }
 
     // ==================== 显示/隐藏教程 ====================

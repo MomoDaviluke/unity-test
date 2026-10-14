@@ -248,8 +248,11 @@ public class EntityFX : MonoBehaviour
         if (hitPrefab == null)
             return;
 
-        GameObject newHitFx = Instantiate(hitPrefab, hitPosition, Quaternion.identity, _target);
+        // Phase 6 池化接入：命中特效挂目标（保持跟随行为）+ 0.5 秒延迟回池
+        GameObject newHitFx = PoolManager.Instance.Spawn(hitPrefab, hitPosition, Quaternion.identity, _target);
+        if (newHitFx == null)
+            return;
         newHitFx.transform.Rotate(hitFxRotion);
-        Destroy(newHitFx, 0.5f);
+        PoolManager.Instance.DespawnDelayed(newHitFx, 0.5f);
     }
 }
