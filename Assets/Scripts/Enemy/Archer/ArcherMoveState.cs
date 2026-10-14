@@ -1,37 +1,22 @@
-using System.Collections;
 using UnityEngine;
 
-public class ArcherMoveState : ArcherGroundState
+/// <summary>
+/// ArcherMoveState（弓箭手移动状态）- Phase 4 迁移至共享基类
+/// 巡逻移动、撞墙转身回待机全部在 EnemyMoveStateBase，弓箭手无特有差异。
+/// </summary>
+public class ArcherMoveState : EnemyMoveStateBase
 {
+    // ==================== 核心引用 ====================
+    private Enemy_Archer archer;
+
+    // ==================== 基类钩子实现 ====================
+    protected override EnemyState BattleState => archer.battleState;
+    protected override EnemyState IdleState => archer.idleState;
+
     // ==================== 构造函数 ====================
-    public ArcherMoveState(Enemy _enemyBase, EnemyStateMachine _stateMachine, string _animBoolName, Enemy_Archer _enemy) : base(_enemyBase, _stateMachine, _animBoolName, _enemy)
+    public ArcherMoveState(Enemy _enemyBase, EnemyStateMachine _stateMachine, string _animBoolName, Enemy_Archer enemy)
+        : base(_enemyBase, _stateMachine, _animBoolName)
     {
-    }
-
-    // ==================== 状态生命周期 ====================
-    // Update中沿面朝方向巡逻，遇到墙壁或边缘时转身并切换回待机
-
-    public override void Enter()
-    {
-        base.Enter();
-    }
-
-    public override void Exit()
-    {
-        base.Exit();
-    }
-
-    public override void Update()
-    {
-        base.Update();
-
-        enemy.SetVelocity(enemy.moveSpeed * enemy.facingDir, enemy.rb.velocity.y);
-
-        // 撞墙或者没有路时转身
-        if (enemy.IsWallDetected() || !enemy.IsGroundDetected())
-        {
-            enemy.Flip();
-            stateMachine.ChangeState(enemy.idleState);
-        }
+        archer = enemy;
     }
 }
