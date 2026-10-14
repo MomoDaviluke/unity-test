@@ -89,7 +89,9 @@ public class UI_InGame : MonoBehaviour
         UpdataSoulsUI();
 
         // 检测技能按键，设置冷却
-        if (Input.GetKeyDown(KeyCode.LeftShift) && skills.dash.dashUnlocked)
+        // 修复：冲刺图标原检测 LeftShift，与实际冲刺键（InputReader.dashKey=Q）不符，
+        // 导致释放冲刺后冷却图标从不点亮；现与玩家动作读同一语义输入（改键同步生效）
+        if (InputReader.instance.DashPressed && skills.dash.dashUnlocked)
             SetCooldownOf(dashImage);
         if (Input.GetKeyDown(KeyCode.Q) && skills.parry.parryUnlocked)
             SetCooldownOf(parryImage);
