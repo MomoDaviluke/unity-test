@@ -41586,6 +41586,7 @@ GameObject:
   - component: {fileID: 1899034091}
   - component: {fileID: 1899034092}
   - component: {fileID: 1899034093}
+  - component: {fileID: 1899034094}
   m_Layer: 6
   m_Name: Player
   m_TagString: Player
@@ -41904,6 +41905,18 @@ MonoBehaviour:
   colorLooseRate: 1.5
   afterImageCooldown: 0.05
   dustFx: {fileID: 3212638197704080735, guid: 36a630bd862577449ab373fe4e28f5e4, type: 3}
+--- !u!114 &1899034094
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1899034082}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2be6c6136fee476897f08fb36bc99394, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1902503190
 GameObject:
   m_ObjectHideFlags: 0
