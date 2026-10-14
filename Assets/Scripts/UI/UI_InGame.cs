@@ -88,20 +88,21 @@ public class UI_InGame : MonoBehaviour
     {
         UpdataSoulsUI();
 
-        // 检测技能按键，设置冷却
+        // 检测技能按键，设置冷却（Phase 5 补充：全部经 InputReader 语义读取，
+        // 与玩家动作同源——Inspector 改键后图标跟随，不再各自硬编码）
         // 修复：冲刺图标原检测 LeftShift，与实际冲刺键（InputReader.dashKey=Q）不符，
         // 导致释放冲刺后冷却图标从不点亮；现与玩家动作读同一语义输入（改键同步生效）
         if (InputReader.instance.DashPressed && skills.dash.dashUnlocked)
             SetCooldownOf(dashImage);
-        if (Input.GetKeyDown(KeyCode.Q) && skills.parry.parryUnlocked)
+        if (InputReader.instance.ParryPressed && skills.parry.parryUnlocked)
             SetCooldownOf(parryImage);
-        if (Input.GetKeyDown(KeyCode.F) && skills.crystal.crystalUnlocked)
+        if (InputReader.instance.CrystalPressed && skills.crystal.crystalUnlocked)
             SetCooldownOf(crystalImage);
-        if (Input.GetKeyDown(KeyCode.Mouse1) && skills.sword.swordUnlocked)
+        if (InputReader.instance.AimSwordPressed && skills.sword.swordUnlocked)
             SetCooldownOf(swordImage);
-        if (Input.GetKeyDown(KeyCode.R) && skills.blackhole.blackHoleUnlocked)
+        if (InputReader.instance.BlackholePressed && skills.blackhole.blackHoleUnlocked)
             SetCooldownOf(blackholeImage);
-        if (Input.GetKeyDown(KeyCode.Alpha1) && flaskEquipped)
+        if (InputReader.instance.FlaskPressed && flaskEquipped)
             SetCooldownOf(flaskImage);
 
         // 更新所有技能冷却显示
