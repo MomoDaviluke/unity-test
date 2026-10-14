@@ -154,4 +154,15 @@ public class InputReaderTests
             || scene.Contains("m_Script: {fileID: 11500000, " + guid.Replace("guid: ", "") + ", type: 3}"),
             "MainScene 应含 InputReader 组件块（Player 对象挂载）");
     }
+
+    // ==================== UI 冷却图标与实际按键同源 ====================
+    [Test]
+    public void UI_InGame_DashIcon_ReadsActualDashKey_NotHardcodedLeftShift()
+    {
+        string source = Read("Scripts/UI/UI_InGame.cs");
+        Assert.IsFalse(source.Contains("KeyCode.LeftShift"),
+            "冲刺冷却图标不得再检测 LeftShift（实际冲刺键为 InputReader.dashKey=Q，原为显示 bug）");
+        Assert.IsTrue(source.Contains("InputReader.instance.DashPressed"),
+            "冲刺冷却图标应与玩家动作读同一语义输入（改键 Inspector 一处生效）");
+    }
 }
