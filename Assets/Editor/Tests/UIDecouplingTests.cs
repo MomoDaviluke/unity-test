@@ -71,7 +71,7 @@ public class UIDecouplingTests
             Assert.AreNotEqual(typeof(Transform), f.FieldType,
                 $"Inventory 不应持有 UI Transform 字段（{f.Name}）");
             Assert.IsFalse(f.FieldType.IsArray &&
-                (f.FieldType.GetElementType() == typeof(UI_itemSlot) ||
+                (f.FieldType.GetElementType() == typeof(UI_ItemSlot) ||
                  f.FieldType.GetElementType() == typeof(UI_EquipmentSlot) ||
                  f.FieldType.GetElementType() == typeof(UI_StatSlot)),
                 $"Inventory 不应持有槽位组件数组（{f.Name}）");

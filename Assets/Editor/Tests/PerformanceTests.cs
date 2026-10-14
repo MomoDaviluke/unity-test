@@ -86,7 +86,7 @@ public class PerformanceTests
     }
 
     // ==================== NonAlloc / 缓存化 结构契约 ====================
-    [TestCase("Scripts/Player/PlayCounterAttackState.cs")]
+    [TestCase("Scripts/Player/PlayerCounterAttackState.cs")]
     [TestCase("Scripts/Skills/Skill.cs")]
     [TestCase("Scripts/Skills/Skill_Controllers/Crystal_Skill_Controller.cs")]
     public void HotPaths_UseNonAlloc_InsteadOfOverlapCircleAll(string file)
