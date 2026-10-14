@@ -35,7 +35,7 @@ public class PlayerJumpState : PlayerState
 
         // ---- 可变跳跃高度 ----
         // 松开跳键时减速，实现低跳（类似马里奥的跳跃手感）
-        if (Input.GetKeyUp(KeyCode.Space) && rb.velocity.y > 0)
+        if (InputReader.instance.JumpReleased && rb.velocity.y > 0)
         {
             rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y * player.variableJumpHeightMult);
         }

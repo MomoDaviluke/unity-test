@@ -2,20 +2,13 @@ using System.Collections;
 using UnityEngine;
 
 /// <summary>
-/// Player（玩家控制器）- 继承自Entity，实现玩家特有的移动、攻击、技能系统
-/// 核心功能：状态机管理、跳跃优化（土狼时间/跳跃缓冲）、冲刺、闪避、技能释放
+/// Player（玩家控制器）- 继承自Entity，实现玩家特有的移动、技能系统
+/// 核心功能：状态机管理、跳跃优化（土狼时间/跳跃缓冲）、冲刺、闪避
+/// Phase 5：输入读取全部经 InputReader；攻击/剑相关职责拆分至 PlayerCombat（partial）；
+/// 死亡存档改由 GameEvents.OnPlayerDead 驱动（SaveManager 订阅）
 /// </summary>
-public class Player : Entity
+public partial class Player : Entity
 {
-    // ==================== 攻击与战斗参数 ====================
-    // attackMovement数组存储每段攻击的前冲距离，实现攻击位移效果
-    // isBusy标志用于锁定输入，防止玩家在攻击时同时执行其他动作
-    [Header("攻击参数")]
-    public Vector2[] attackMovement;                    // 攻击时的位移（每段攻击向前突进的距离）
-    public float counterAttackDuration = 0.2f;          // 反击窗口持续时间（这段时间内被攻击会触发反击）
-    public bool isBusy { get; private set; }            // 是否处于忙碌状态（执行动作时无法响应其他输入）
-    [HideInInspector] public Transform lastDamageSource; // 上次受到伤害的来源（用于反击时追踪敌人位置）
-
     // ==================== 移动与物理参数 ====================
     // 使用加速度/减速度模拟真实的角色移动手感，而非瞬间变速
     // airControlMultiplier模拟空中惯性，使平台跳跃更有手感
@@ -57,9 +50,7 @@ public class Player : Entity
 
     // ==================== 外部组件引用 ====================
     // skill通过SkillManager单例获取，统一管理所有技能的解锁和冷却
-    // sword引用用于追踪投掷出的剑，接剑时销毁并切换状态
     public SkillManager skill { get; private set; }     // 技能管理器引用
-    public GameObject sword { get; private set; }       // 当前投掷出的剑对象
     public PlayerFX fX { get; private set; }            // 玩家特效组件
 
     // ==================== 玩家状态机 ====================
@@ -133,6 +124,9 @@ public class Player : Entity
 
     /// <summary>
     /// 每帧更新 - 处理输入、更新状态机和计时器
+    /// Phase 5 跳跃收敛：计时器更新先于状态机驱动，使地面状态的 CanJump()
+    /// 在按键当帧即可读到最新缓冲/土狼值——消除原"状态直判 Space + Player 写缓冲"
+    /// 的双路径判定（同一帧两次 ChangeState），且无额外帧延迟。
     /// </summary>
     protected override void Update()
     {
@@ -141,15 +135,16 @@ public class Player : Entity
 
         base.Update();
 
-        stateMachine.currentState.Update();
         UpdateCoyoteTime();
         UpdateJumpBuffer();
+
+        stateMachine.currentState.Update();
         checkForDashInput();
 
-        if (Input.GetKeyDown(KeyCode.F) && skill.crystal.crystalUnlocked)
+        if (InputReader.instance.CrystalPressed && skill.crystal.crystalUnlocked)
             skill.crystal.CanUseSkill();
 
-        if (Input.GetKeyDown(KeyCode.Alpha1))
+        if (InputReader.instance.FlaskPressed)
             Inventory.instance.UseFlask();
     }
 
@@ -169,11 +164,11 @@ public class Player : Entity
     }
 
     /// <summary>
-    /// 更新跳跃缓冲计时器 - 提前按下跳跃键的有效时间
+    /// 更新跳跃缓冲计时器 - 提前按下跳跃键的有效时间（输入经 InputReader）
     /// </summary>
     private void UpdateJumpBuffer()
     {
-        if (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.JoystickButton4))
+        if (InputReader.instance.JumpPressed)
             jumpBufferTimer = jumpBufferTime;   // 按下跳跃键时重置计时器
         else
             jumpBufferTimer -= Time.deltaTime;  // 持续倒计时
@@ -223,40 +218,8 @@ public class Player : Entity
         dashSpeed = defaultDashSpeed;
     }
 
-    // ==================== 剑投掷与接剑系统 ====================
-    // AssignNewSword在剑投掷出去时调用，保存剑的引用
-    // CatchTheSword在剑返回玩家时调用，销毁飞剑并切换到接剑动画状态
-
-    /// <summary>
-    /// 分配新剑（投掷技能使用）
-    /// </summary>
-    public void AssignNewSword(GameObject _newSword)
-    {
-        sword = _newSword;
-    }
-
-    /// <summary>
-    /// 接剑 - 切换到接剑状态并销毁飞剑
-    /// </summary>
-    public void CatchTheSword()
-    {
-        stateMachine.ChangeState(catchSword);
-        Destroy(sword);
-    }
-
-    // ==================== 忙碌状态与动画触发 ====================
-    // BusyFor协程用于锁定玩家输入，常见于攻击前摇/后摇期间
+    // ==================== 动画触发 ====================
     // AnimationTrigger由动画事件调用，通知当前状态动画关键帧已到达
-
-    /// <summary>
-    /// 忙碌协程 - 在指定时间内无法执行其他动作（如攻击时禁止移动）
-    /// </summary>
-    public IEnumerator BusyFor(float _seconds)
-    {
-        isBusy = true;
-        yield return new WaitForSeconds(_seconds);
-        isBusy = false;
-    }
 
     /// <summary>
     /// 动画触发器 - 由动画事件调用，通知当前状态动画已播放到关键帧
@@ -268,7 +231,7 @@ public class Player : Entity
     // 若无水平输入，使用当前朝向作为默认方向
 
     /// <summary>
-    /// 检测冲刺输入 - Q键触发，检查解锁状态、墙壁检测、冷却和方向
+    /// 检测冲刺输入 - 经 InputReader 读取，检查解锁状态、墙壁检测、冷却和方向
     /// </summary>
     private void checkForDashInput()
     {
@@ -278,9 +241,9 @@ public class Player : Entity
         if (IsWallDetected())
             return;
 
-        if (Input.GetKeyDown(KeyCode.Q) && SkillManager.instance.dash.CanUseSkill())
+        if (InputReader.instance.DashPressed && SkillManager.instance.dash.CanUseSkill())
         {
-            dashDir = Input.GetAxisRaw("Horizontal");
+            dashDir = InputReader.instance.MoveX;
             if (dashDir == 0)
                 dashDir = facingDir;    // 如果没有输入方向，使用当前朝向
             stateMachine.ChangeState(dashState);
@@ -288,15 +251,16 @@ public class Player : Entity
     }
 
     // ==================== 死亡与击退重置 ====================
-    // 死亡时自动存档并切换到死亡状态，SetupZeroKnockbackPower在死亡/复活时清理物理状态
+    // 死亡时切换到死亡状态（存档由 SaveManager 订阅 OnPlayerDead 完成），
+    // SetupZeroKnockbackPower在死亡/复活时清理物理状态
 
     /// <summary>
-    /// 死亡处理 - 存档并切换到死亡状态
+    /// 死亡处理 - 切换到死亡状态（PlayerDeadState.Enter 广播 OnPlayerDead，
+    /// SaveManager/UI 各自订阅响应，玩家逻辑不再直接引用存档系统）
     /// </summary>
     public override void Die()
     {
         base.Die();
-        SaveManager.instance.SaveGame();
         stateMachine.ChangeState(deadState);
     }
 

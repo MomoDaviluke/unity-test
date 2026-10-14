@@ -28,7 +28,7 @@ public class PlayerDodgeState : PlayerState
         stateTimer = player.dodgeDuration;
 
         // 直接读取当前输入，避免使用上一帧的输入值
-        float currentXInput = Input.GetAxisRaw("Horizontal");
+        float currentXInput = InputReader.instance.MoveX;
 
         // 记录当前输入方向作为闪避方向，无输入则使用朝向方向
         dodgeDirection = currentXInput != 0 ? currentXInput : player.facingDir;

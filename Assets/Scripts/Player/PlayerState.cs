@@ -45,8 +45,9 @@ public class PlayerState
     public virtual void Update()
     {
         stateTimer -= Time.deltaTime;
-        xInput = Input.GetAxisRaw("Horizontal");
-        yInput = Input.GetAxisRaw("Vertical");
+        // Phase 5：输入经 InputReader 集中读取（改键在 Inspector 生效）
+        xInput = InputReader.instance.MoveX;
+        yInput = InputReader.instance.MoveY;
         player.anim.SetFloat("yVelocity", rb.velocity.y);
     }
 

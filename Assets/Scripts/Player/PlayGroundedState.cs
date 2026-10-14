@@ -36,8 +36,8 @@ public class PlayGroundedState : PlayerState
     {
         base.Update();
 
-        // ---- 黑洞技能（R键）----
-        if (Input.GetKeyDown(KeyCode.R) && player.skill.blackhole.blackHoleUnlocked)
+        // ---- 黑洞技能 ----
+        if (InputReader.instance.BlackholePressed && player.skill.blackhole.blackHoleUnlocked)
         {
             if (player.skill.blackhole.cooldownTimer > 0)
             {
@@ -47,26 +47,26 @@ public class PlayGroundedState : PlayerState
             stateMachine.ChangeState(player.blackhole);
         }
 
-        // ---- 投掷剑技能（鼠标右键）----
-        if (Input.GetKeyDown(KeyCode.Mouse1) && HasNoSword() && player.skill.sword.swordUnlocked)
+        // ---- 投掷剑技能 ----
+        if (InputReader.instance.AimSwordPressed && HasNoSword() && player.skill.sword.swordUnlocked)
         {
             stateMachine.ChangeState(player.aimSowrd);
         }
 
-        // ---- 反击技能（Q键）----
-        if (Input.GetKeyDown(KeyCode.Q) && player.skill.parry.parryUnlocked)
+        // ---- 反击技能 ----
+        if (InputReader.instance.ParryPressed && player.skill.parry.parryUnlocked)
         {
             stateMachine.ChangeState(player.counterAttackState);
         }
 
-        // ---- 普通攻击（鼠标左键按住）----
-        if (Input.GetKey(KeyCode.Mouse0))
+        // ---- 普通攻击（按住连段）----
+        if (InputReader.instance.AttackHeld)
         {
             stateMachine.ChangeState(player.primaryAttackState);
         }
 
-        // ---- 闪避（Ctrl键）----
-        if (Input.GetKeyDown(KeyCode.LeftControl) && Time.time - player.lastDodgeTime > player.dodgeCooldown)
+        // ---- 闪避 ----
+        if (InputReader.instance.DodgePressed && Time.time - player.lastDodgeTime > player.dodgeCooldown)
         {
             stateMachine.ChangeState(player.dodgeState);
         }
@@ -77,20 +77,11 @@ public class PlayGroundedState : PlayerState
             stateMachine.ChangeState(player.airState);
         }
 
-        // ---- 跳跃（空格键）----
-        if (Input.GetKeyDown(KeyCode.Space) && player.IsGroundDetected())
-        {
-            stateMachine.ChangeState(player.jumpState);
-        }
-
-        // ---- 跳跃缓冲机制 ----
-        // 提前按跳键时记录缓冲时间，配合土狼时间实现更宽松的跳跃判定
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            player.jumpBufferTimer = player.jumpBufferTime;
-        }
-
-        // 土狼时间+跳跃缓冲：满足条件时执行跳跃
+        // ---- 跳跃（Phase 5 收敛）----
+        // 原此处有"直判 Space+落地 切跳跃"与"直写 jumpBufferTimer"两段逻辑，
+        // 与 Player.UpdateJumpBuffer/CanJump 构成双路径判定（同帧可两次 ChangeState）。
+        // 现统一为 Player 侧 CanJump() 单一查询：缓冲/土狼计时器在 Player.Update
+        // 先于状态机更新（按键当帧即生效，无延迟），地面状态只调用查询。
         if (player.CanJump())
         {
             player.UseJump();

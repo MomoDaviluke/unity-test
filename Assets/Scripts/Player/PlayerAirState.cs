@@ -59,7 +59,7 @@ public class PlayerAirState : PlayerState
         }
 
         // ---- 空中闪避 ----
-        if (Input.GetKeyDown(KeyCode.LeftControl) && Time.time - player.lastDodgeTime > player.dodgeCooldown)
+        if (InputReader.instance.DodgePressed && Time.time - player.lastDodgeTime > player.dodgeCooldown)
         {
             stateMachine.ChangeState(player.dodgeState);
         }

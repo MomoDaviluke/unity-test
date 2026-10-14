@@ -40,8 +40,8 @@ public class PlayerWallSlideState : PlayerState
         if (player.IsWallDetected() == false)
             stateMachine.ChangeState(player.airState);
 
-        // 蹬墙跳：按空格且按住朝向墙壁的方向
-        if (Input.GetKeyDown(KeyCode.Space) && xInput == player.facingDir)
+        // 蹬墙跳：按跳键且按住朝向墙壁的方向
+        if (InputReader.instance.WallJumpPressed && xInput == player.facingDir)
         {
             stateMachine.ChangeState(player.wallJumpState);
             return;
