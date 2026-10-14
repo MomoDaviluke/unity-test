@@ -157,12 +157,20 @@ public class InputReaderTests
 
     // ==================== UI 冷却图标与实际按键同源 ====================
     [Test]
-    public void UI_InGame_DashIcon_ReadsActualDashKey_NotHardcodedLeftShift()
+    public void UI_InGame_HardcodesNoInput_AllCooldownKeysViaInputReader()
     {
         string source = Read("Scripts/UI/UI_InGame.cs");
-        Assert.IsFalse(source.Contains("KeyCode.LeftShift"),
-            "冲刺冷却图标不得再检测 LeftShift（实际冲刺键为 InputReader.dashKey=Q，原为显示 bug）");
-        Assert.IsTrue(source.Contains("InputReader.instance.DashPressed"),
-            "冲刺冷却图标应与玩家动作读同一语义输入（改键 Inspector 一处生效）");
+
+        // 全文件零直接输入调用：6 个冷却图标（冲刺/反击/水晶/飞剑/黑洞/药水）
+        // 均须读 InputReader 语义属性，与玩家动作同源，Inspector 改键图标跟随
+        Assert.IsFalse(source.Contains("Input.GetKey"),
+            "UI_InGame 不得再硬编码 Input.GetKey*（含原冲刺图标误检 LeftShift 的显示 bug 回归）");
+        Assert.IsFalse(source.Contains("Input.GetMouseButton"),
+            "UI_InGame 不得再硬编码鼠标按钮");
+
+        foreach (string reader in new[] { "DashPressed", "ParryPressed", "CrystalPressed",
+                                          "AimSwordPressed", "BlackholePressed", "FlaskPressed" })
+            Assert.IsTrue(source.Contains("InputReader.instance." + reader),
+                $"UI_InGame 冷却图标应经 InputReader.{reader} 与玩家动作同源");
     }
 }
