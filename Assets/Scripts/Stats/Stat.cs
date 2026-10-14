@@ -16,6 +16,19 @@ public class Stat
     [SerializeField] private int baseValue;     // 基础值：角色初始属性，不随装备改变
     public List<int> modifiers;                 // 修饰符列表：装备、Buff等提供的临时加成
 
+    // Phase 3：值变化回调（CharacterStats 绑定到 onStatsChanged，装备/Buff 修改自动通知 UI）
+    // NonSerialized：委托不参与 Unity 序列化，场景数据不受影响
+    [System.NonSerialized] public System.Action onChanged;
+
+    /// <summary>
+    /// 默认构造：初始化修饰符列表（纯 C# new Stat 场景不再为 null；
+    /// Unity 反序列化时先调本构造再用序列化数据覆盖字段，无副作用）
+    /// </summary>
+    public Stat()
+    {
+        modifiers = new List<int>();
+    }
+
     // ==================== 属性值计算 ====================
     // GetValue遍历所有修饰符并累加，得到当前最终属性值
     // 设计为每次实时计算，确保装备更换/Buff变化时立即生效
@@ -43,6 +56,7 @@ public class Stat
     public void SetDefaultValue(int _value)
     {
         baseValue = _value;
+        onChanged?.Invoke();
     }
 
     // ==================== 修饰符管理 ====================
@@ -56,6 +70,7 @@ public class Stat
     public void AddModifier(int _modifier)
     {
         modifiers.Add(_modifier);
+        onChanged?.Invoke();
     }
 
     /// <summary>
@@ -65,5 +80,6 @@ public class Stat
     public void RemoveModifier(int _modifier)
     {
         modifiers.Remove(_modifier);
+        onChanged?.Invoke();
     }
 }
