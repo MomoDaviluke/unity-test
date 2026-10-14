@@ -853,19 +853,9 @@ MonoBehaviour:
   isPlayer:
     serializedVersion: 2
     m_Bits: 64
-  stunDuration: 2
-  stunDirection: {x: 10, y: 12}
   counterImage: {fileID: 8194368794410772600}
-  moveSpeed: 3
-  chaseSpeed: 4
-  idleTime: 2
-  battleTime: 5
-  attackDistance: 1.4
-  attackCooldown: 0.4
-  minAttackCooldown: 0.25
-  maxAttackCooldown: 0.5
-  agroDistance: 3
   lastTimeAttacked: 0
+  enemyData: {fileID: 11400000, guid: ded2be78f19242ffa0bab26a169b9ea7, type: 2}
   slimeType: 2
   slimesToCreate: 0
   slimePrefab: {fileID: 7801860477288077423}

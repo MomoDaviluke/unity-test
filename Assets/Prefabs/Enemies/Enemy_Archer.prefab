@@ -471,19 +471,9 @@ MonoBehaviour:
   isPlayer:
     serializedVersion: 2
     m_Bits: 64
-  stunDuration: 1
-  stunDirection: {x: 10, y: 12}
   counterImage: {fileID: 4721830299726160273}
-  moveSpeed: 3
-  chaseSpeed: 3
-  idleTime: 2
-  battleTime: 7
-  attackDistance: 15
-  attackCooldown: 0
-  minAttackCooldown: 1
-  maxAttackCooldown: 2
-  agroDistance: 3
   lastTimeAttacked: 0
+  enemyData: {fileID: 11400000, guid: e31da29834cb463fb37edc5ee6c6368b, type: 2}
   arrowPrefab: {fileID: 7451639984482926957, guid: 52f26af59d373034189c65999eb92080, type: 3}
   arrowSpeed: 7
   arrowDamage: 0

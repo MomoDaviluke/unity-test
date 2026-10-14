@@ -355,18 +355,9 @@ MonoBehaviour:
   isPlayer:
     serializedVersion: 2
     m_Bits: 64
-  stunDuration: 1
-  stunDirection: {x: 7, y: 12}
   counterImage: {fileID: 8718003675789400385}
-  moveSpeed: 1.5
-  chaseSpeed: 3
-  idleTime: 2
-  battleTime: 7
-  attackDistance: 2
-  attackCooldown: 0.4
-  minAttackCooldown: 0.35
-  maxAttackCooldown: 0.55
   lastTimeAttacked: 0
+  enemyData: {fileID: 11400000, guid: 79ac30b5c78546549d2e6dc0b1679b02, type: 2}
 --- !u!114 &2749660062093936818
 MonoBehaviour:
   m_ObjectHideFlags: 0
