@@ -1,40 +1,34 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// SkeletonIdleState（骷髅待机状态）- 静止待机，计时结束后切换到移动状态
+/// SkeletonIdleState（骷髅待机状态）- Phase 4 迁移至共享基类
+/// 公共逻辑（计时待机、玩家检测、切移动状态）在 EnemyIdleStateBase；
+/// 骷髅特有：Enter 关闭反击窗口、Exit 播放音效 24。
 /// </summary>
-public class SkeletonIdleState : SkeletonGroundState
+public class SkeletonIdleState : EnemyIdleStateBase
 {
+    // ==================== 核心引用 ====================
+    private Enemy_Skeleton skeleton;   // 类型化引用（访问骷髅特有状态属性）
+
+    // ==================== 基类钩子实现 ====================
+    protected override EnemyState BattleState => skeleton.battleState;
+    protected override EnemyState MoveState => skeleton.moveState;
+
     // ==================== 构造函数 ====================
-    // 直接调用父类构造函数，无需额外初始化
-    public SkeletonIdleState(Enemy _enemyBase, EnemyStateMachine _stateMachine, string _animBoolName, Enemy_Skeleton enemy) : base(_enemyBase, _stateMachine, _animBoolName, enemy)
+    public SkeletonIdleState(Enemy _enemyBase, EnemyStateMachine _stateMachine, string _animBoolName, Enemy_Skeleton enemy)
+        : base(_enemyBase, _stateMachine, _animBoolName)
     {
+        skeleton = enemy;
     }
 
-    // ==================== 状态生命周期 ====================
-    // Enter时关闭反击窗口并设置待机计时器
-    // Update中计时器归零后切换到移动状态进行巡逻
-    // Exit时播放音效提示状态切换
-
-    public override void Enter()
+    // ==================== 骷髅特有逻辑 ====================
+    protected override void OnEnterExtra()
     {
-        base.Enter();
-        enemy.CloseCountAttackWindow();
-        stateTimer = enemy.idleTime;
+        skeleton.CloseCountAttackWindow();
     }
 
-    public override void Exit()
+    protected override void OnExitExtra()
     {
-        base.Exit();
-        AudioManager.instance.PlaySFX(24, enemy.transform);
-    }
-
-    public override void Update()
-    {
-        base.Update();
-        if (stateTimer < 0)
-            stateMachine.ChangeState(enemy.moveState);
+        AudioManager.instance.PlaySFX(24, skeleton.transform);
     }
 }

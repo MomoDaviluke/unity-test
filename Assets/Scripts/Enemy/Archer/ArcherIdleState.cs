@@ -1,39 +1,28 @@
-using System.Collections;
 using UnityEngine;
 
-public class ArcherIdleState : ArcherGroundState
+/// <summary>
+/// ArcherIdleState（弓箭手待机状态）- Phase 4 迁移至共享基类
+/// 公共逻辑在 EnemyIdleStateBase；弓箭手特有：Exit 播放音效 24。
+/// </summary>
+public class ArcherIdleState : EnemyIdleStateBase
 {
+    // ==================== 核心引用 ====================
+    private Enemy_Archer archer;
+
+    // ==================== 基类钩子实现 ====================
+    protected override EnemyState BattleState => archer.battleState;
+    protected override EnemyState MoveState => archer.moveState;
+
     // ==================== 构造函数 ====================
-    public ArcherIdleState(Enemy _enemyBase, EnemyStateMachine _stateMachine, string _animBoolName, Enemy_Archer _enemy) : base(_enemyBase, _stateMachine, _animBoolName, _enemy)
+    public ArcherIdleState(Enemy _enemyBase, EnemyStateMachine _stateMachine, string _animBoolName, Enemy_Archer enemy)
+        : base(_enemyBase, _stateMachine, _animBoolName)
     {
+        archer = enemy;
     }
 
-    // ==================== 状态生命周期 ====================
-    // Enter时设置待机计时器
-    // Update中计时器归零后切换到移动状态
-    // Exit时播放音效
-
-    public override void Enter()
+    // ==================== 弓箭手特有逻辑 ====================
+    protected override void OnExitExtra()
     {
-        base.Enter();
-
-        stateTimer = enemy.idleTime;
-    }
-
-    public override void Exit()
-    {
-        base.Exit();
-
-        AudioManager.instance.PlaySFX(24, enemy.transform);
-    }
-
-    public override void Update()
-    {
-        base.Update();
-
-        if (stateTimer < 0)
-        {
-            stateMachine.ChangeState(enemy.moveState);
-        }
+        AudioManager.instance.PlaySFX(24, archer.transform);
     }
 }

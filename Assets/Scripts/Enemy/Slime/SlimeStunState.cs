@@ -1,57 +1,42 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class SlimeStunState : EnemyState
+/// <summary>
+/// SlimeStunState（史莱姆眩晕状态）- Phase 4 迁移至共享基类
+/// 闪烁/击退/计时归位在 EnemyStunnedStateBase；
+/// 史莱姆特有：落地后播眩晕动画并开启无敌帧（OnUpdateExtra），
+/// Exit 不做闪烁取消（其 CancelColorChange 在落地检测内调用，CancelBlinkOnExit=false），
+/// 仅关闭无敌帧（OnExitExtra）。
+/// </summary>
+public class SlimeStunState : EnemyStunnedStateBase
 {
     // ==================== 核心引用 ====================
-    private Enemy_Slime enemy;
+    private Enemy_Slime slime;
+
+    // ==================== 基类钩子实现 ====================
+    protected override EnemyState IdleState => slime.idleState;
+    protected override bool CancelBlinkOnExit => false;   // 闪烁取消在 Update 落地检测中执行
 
     // ==================== 构造函数 ====================
-    public SlimeStunState(Enemy _enemyBase, EnemyStateMachine _stateMachine, string _animBoolName, Enemy_Slime enemy) : base(_enemyBase, _stateMachine, _animBoolName)
+    public SlimeStunState(Enemy _enemyBase, EnemyStateMachine _stateMachine, string _animBoolName, Enemy_Slime enemy)
+        : base(_enemyBase, _stateMachine, _animBoolName)
     {
-        this.enemy = enemy;
+        slime = enemy;
     }
 
-    // ==================== 状态生命周期 ====================
-    // Enter时启动红色闪烁，设置眩晕时间，施加击退力
-    // Update中落地后触发眩晕动画并设置无敌
-    // Exit时取消无敌状态
-
-    public override void Enter()
+    // ==================== 史莱姆特有逻辑 ====================
+    protected override void OnUpdateExtra()
     {
-        base.Enter();
-
-        // 启动红色闪烁视觉反馈
-        enemy.fX.InvokeRepeating("RedColorBlink", 0, .1f);
-
-        stateTimer = enemy.stunDuration;
-
-        // 施加击退力
-        rb.velocity = new Vector2(-enemy.facingDir * enemy.stunDirection.x, enemy.stunDirection.y);
-    }
-
-    public override void Exit()
-    {
-        base.Exit();
-
-        enemy.stats.MakeInvincible(false);
-    }
-
-    public override void Update()
-    {
-        base.Update();
-
         // 落地后触发眩晕动画并设置无敌
-        if (rb.velocity.y < .1f && enemy.IsGroundDetected())
+        if (rb.velocity.y < .1f && slime.IsGroundDetected())
         {
-            enemy.fX.Invoke("CancelColorChange", 0);
-            enemy.anim.SetTrigger("Stun");
-            enemy.stats.MakeInvincible(true);
+            slime.fX.Invoke("CancelColorChange", 0);
+            slime.anim.SetTrigger("Stun");
+            slime.stats.MakeInvincible(true);
         }
+    }
 
-        // 眩晕时间结束后返回空闲状态
-        if (stateTimer < 0)
-            stateMachine.ChangeState(enemy.idleState);
+    protected override void OnExitExtra()
+    {
+        slime.stats.MakeInvincible(false);
     }
 }

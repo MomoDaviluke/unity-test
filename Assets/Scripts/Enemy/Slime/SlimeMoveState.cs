@@ -1,40 +1,25 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-
-public class SlimeMoveState : SlimeGroundedState
+/// <summary>
+/// SlimeMoveState（史莱姆移动状态）- Phase 4 迁移至共享基类
+/// 公共逻辑在 EnemyMoveStateBase；特有差异：仇恨距离硬编码 2.5。
+/// 注：原实现撞墙时设 stateTimer = 0.2f，但 IdleState.Enter 立即用 idleTime 覆盖，
+/// 属死代码，迁移时删除（行为等价）。
+/// </summary>
+public class SlimeMoveState : EnemyMoveStateBase
 {
+    // ==================== 核心引用 ====================
+    private Enemy_Slime slime;
+
+    // ==================== 基类钩子实现 ====================
+    protected override EnemyState BattleState => slime.battleState;
+    protected override EnemyState IdleState => slime.idleState;
+    protected override float AgroDistance => 2.5f;   // 原 SlimeGroundedState 硬编码值（Phase 7 可数据化）
+
     // ==================== 构造函数 ====================
-    public SlimeMoveState(Enemy _enemyBase, EnemyStateMachine _stateMachine, string _animBoolName, Enemy_Slime _enemy) : base(_enemyBase, _stateMachine, _animBoolName, _enemy)
+    public SlimeMoveState(Enemy _enemyBase, EnemyStateMachine _stateMachine, string _animBoolName, Enemy_Slime enemy)
+        : base(_enemyBase, _stateMachine, _animBoolName)
     {
-    }
-
-    // ==================== 状态生命周期 ====================
-    // Update中沿面朝方向巡逻，遇到墙壁或边缘时转身并切换回待机
-
-    public override void Enter()
-    {
-        base.Enter();
-    }
-
-    public override void Exit()
-    {
-        base.Exit();
-    }
-
-    public override void Update()
-    {
-        base.Update();
-
-        enemy.SetVelocity(enemy.moveSpeed * enemy.facingDir, enemy.rb.velocity.y);
-
-        // 检测墙壁或悬崖，如有则转向并切换到空闲状态
-        if (enemy.IsWallDetected() || !enemy.IsGroundDetected())
-        {
-            enemy.Flip();
-            stateTimer = 0.2f; // 设置短暂的空闲时间
-            stateMachine.ChangeState(enemy.idleState);
-        }
+        slime = enemy;
     }
 }
