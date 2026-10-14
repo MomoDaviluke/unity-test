@@ -20,6 +20,19 @@ public class SaveManager : Singleton<SaveManager>
     private List<ISaveManager> saveManagers = new List<ISaveManager>();
     private FileDataHandler dataHandler;
 
+    // ==================== 事件订阅 ====================
+    // Phase 5：玩家死亡自动存档改由事件总线驱动（原 Player.Die 直接调用 SaveGame，
+    // 玩家逻辑不再反向依赖存档系统；依赖方向：存档层 → 总线 ← 玩家逻辑）
+    private void OnEnable()
+    {
+        GameEvents.OnPlayerDead += SaveGame;
+    }
+
+    private void OnDisable()
+    {
+        GameEvents.OnPlayerDead -= SaveGame;
+    }
+
     private void Start()
     {
         dataHandler = new FileDataHandler(Application.persistentDataPath, fileName, encryptData);
