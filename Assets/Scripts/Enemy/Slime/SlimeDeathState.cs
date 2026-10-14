@@ -1,30 +1,14 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class SlimeDeathState : EnemyState
+/// <summary>
+/// SlimeDeathState（史莱姆死亡状态）- Phase 4 迁移至共享基类
+/// 停止移动 + 一次性调度销毁全部在 EnemyDeadStateBase，史莱姆无特有差异。
+/// </summary>
+public class SlimeDeathState : EnemyDeadStateBase
 {
-    private Enemy_Slime enemy; // 史莱姆敌人引用
-
-    // 构造函数：初始化死亡状态
-    public SlimeDeathState(Enemy _enemyBase, EnemyStateMachine _stateMachine, string _animBoolName, Enemy_Slime enemy) : base(_enemyBase, _stateMachine, _animBoolName)
+    // ==================== 构造函数 ====================
+    public SlimeDeathState(Enemy _enemyBase, EnemyStateMachine _stateMachine, string _animBoolName, Enemy_Slime enemy)
+        : base(_enemyBase, _stateMachine, _animBoolName)
     {
-        this.enemy = enemy;
-    }
-
-    // 进入死亡状态
-    public override void Enter()
-    {
-        base.Enter();
-        rb.velocity = Vector2.zero;
-
-        // 修复 B10：销毁调度只做一次，避免 Update 每帧重复调度。
-        GameObject.Destroy(enemy.gameObject, 2f);
-    }
-
-    // 死亡状态更新
-    public override void Update()
-    {
-        base.Update();
     }
 }
