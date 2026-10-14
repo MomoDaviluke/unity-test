@@ -100,15 +100,16 @@ public class Sword_Skill : Skill
     }
 
     // ==================== 更新与创建 ====================
-    // 瞄准期间显示辅助点，松开右键时计算发射方向
+    // 瞄准期间显示辅助点，松开瞄准键时计算发射方向
+    // Phase 5：输入经 InputReader（与 Player 瞄准状态同键，改键一处生效）
     protected override void Update()
     {
         // 松开鼠标时记录最终发射方向
-        if (Input.GetKeyUp(KeyCode.Mouse1))
+        if (InputReader.instance.AimSwordReleased)
             finalDir = new Vector2(AimDirection().normalized.x * launchForce.x, AimDirection().normalized.y * launchForce.y);
 
         // 按住鼠标时更新辅助点位置
-        if (Input.GetKey(KeyCode.Mouse1))
+        if (InputReader.instance.AimSwordHeld)
         {
             for (int i = 0; i < dots.Length; i++)
             {
@@ -192,7 +193,7 @@ public class Sword_Skill : Skill
     public Vector2 AimDirection()
     {
         Vector2 playerPosition = player.transform.position;
-        Vector2 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        Vector2 mousePosition = Camera.main.ScreenToWorldPoint(InputReader.instance.MousePosition);
         Vector2 direction = mousePosition - playerPosition;
         return direction;
     }

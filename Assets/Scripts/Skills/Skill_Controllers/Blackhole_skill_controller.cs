@@ -58,8 +58,8 @@ public class Blackhole_skill_controller : MonoBehaviour
         cloneAttackTimer -= Time.deltaTime;
         blackholeTimer -= Time.deltaTime;
 
-        // 按R键提前释放分身攻击
-        if (Input.GetKeyDown(KeyCode.R) && targets.Count > 0 && !cloneAttackReleased)
+        // 按黑洞键提前释放分身攻击（Phase 5：输入经 InputReader，与玩家黑洞输入同键）
+        if (InputReader.instance.BlackholePressed && targets.Count > 0 && !cloneAttackReleased)
         {
             ReleaseCloneAttack();
         }
