@@ -35,12 +35,12 @@ public class PlayerAimSwordState : PlayerState
         base.Update();
         player.SetZeroVelocity();
 
-        // 松开右键退出瞄准状态
-        if(Input.GetKeyUp(KeyCode.Mouse1))
+        // 松开瞄准键退出瞄准状态
+        if(InputReader.instance.AimSwordReleased)
             stateMachine.ChangeState(player.idleState);
 
         // 根据鼠标位置调整角色朝向
-        Vector2 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        Vector2 mousePosition = Camera.main.ScreenToWorldPoint(InputReader.instance.MousePosition);
         if (player.transform.position.x > mousePosition.x && player.facingDir == 1)
             player.Flip();
         else if(player.transform.position.x < mousePosition.x && player.facingDir == -1)
