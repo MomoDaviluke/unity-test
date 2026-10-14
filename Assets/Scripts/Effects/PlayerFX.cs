@@ -39,13 +39,18 @@ public class PlayerFX : EntityFX
     }
 
     // ==================== 创建残影 ====================
+    // Phase 6 池化接入：残影高频生成（闪避/冲刺期间每 0.05 秒一个），淡出结束由 AfterImageFX 回池
     public void CreateAfterImage()
     {
         if (afterImageCooldownTimer < 0)
         {
             afterImageCooldownTimer = afterImageCooldown;
-            GameObject newAfterImage = Instantiate(afterImagePrefab, transform.position, transform.rotation);
-            newAfterImage.GetComponent<AfterImageFX>().SetupAfterImage(colorLooseRate, sr.sprite);
+            GameObject newAfterImage = PoolManager.Instance.Spawn(afterImagePrefab, transform.position, transform.rotation);
+            if (newAfterImage == null)
+                return;
+            AfterImageFX fx = newAfterImage.GetComponent<AfterImageFX>();
+            if (fx != null)
+                fx.SetupAfterImage(colorLooseRate, sr.sprite);
         }
     }
 
