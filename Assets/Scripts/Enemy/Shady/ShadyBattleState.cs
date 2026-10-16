@@ -61,7 +61,7 @@ public class ShadyBattleState : EnemyState
         else if (player.position.x < enemy.transform.position.x)
             moveDir = -1;
 
-        enemy.SetVelocity(enemy.moveSpeed * moveDir, rb.velocity.y);
+        enemy.SetVelocity(enemy.moveSpeed * moveDir, rb.linearVelocity.y);
     }
 
     public override void Exit()

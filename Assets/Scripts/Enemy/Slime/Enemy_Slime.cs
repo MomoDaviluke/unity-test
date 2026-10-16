@@ -118,7 +118,7 @@ public class Enemy_Slime : Enemy
 
         // 设置击退状态和速度
         isKnocked = true;
-        GetComponent<Rigidbody2D>().velocity = new Vector2(xVelocity * -facingDir, yVelocity);
+        GetComponent<Rigidbody2D>().linearVelocity = new Vector2(xVelocity * -facingDir, yVelocity);
 
         // 延时取消击退状态
         Invoke("CancelKnockback", 1.5f);

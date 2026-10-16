@@ -54,7 +54,7 @@ public class PlayerWallJumpState : PlayerState
         if (xInput != 0)
         {
             float moveSpeed = player.moveSpeed * 0.5f;
-            rb.velocity = new Vector2(xInput * moveSpeed, rb.velocity.y);
+            rb.linearVelocity = new Vector2(xInput * moveSpeed, rb.linearVelocity.y);
         }
 
         // 接触地面时切换回待机状态

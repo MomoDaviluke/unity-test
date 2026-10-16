@@ -53,9 +53,9 @@ public class PlayerWallSlideState : PlayerState
 
         // 控制下滑速度：按住下键快速下滑，否则缓慢下滑
         if (yInput < 0)
-            rb.velocity = new Vector2(0, rb.velocity.y);
+            rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
         else
-            rb.velocity = new Vector2(0, rb.velocity.y * 0.5f);
+            rb.linearVelocity = new Vector2(0, rb.linearVelocity.y * 0.5f);
 
         // 接触地面时切换回待机状态
         if (player.IsGroundDetected())

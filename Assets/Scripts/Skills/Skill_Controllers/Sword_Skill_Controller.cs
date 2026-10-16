@@ -58,7 +58,7 @@ public class Sword_Skill_Controller : MonoBehaviour
     {
         player = _player;
         freezeTimeDuration = _freezeTimeDuration;
-        rb.velocity = _dir;
+        rb.linearVelocity = _dir;
         rb.gravityScale = _gravityScale;
         returnSpeed = _returnSpeed;
 
@@ -66,7 +66,7 @@ public class Sword_Skill_Controller : MonoBehaviour
             anim.SetBool("Rotation", true);
 
         Invoke("DestroyMe", 8f);
-        spinDirection = Mathf.Clamp(rb.velocity.x, -1, 1);
+        spinDirection = Mathf.Clamp(rb.linearVelocity.x, -1, 1);
     }
 
     // 设置反弹参数
@@ -105,7 +105,7 @@ public class Sword_Skill_Controller : MonoBehaviour
     private void Update()
     {
         if (canRotate)
-            transform.right = rb.velocity;
+            transform.right = rb.linearVelocity;
 
         // 飞剑返回玩家
         if (isReturning)

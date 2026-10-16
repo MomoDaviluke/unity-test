@@ -27,7 +27,7 @@ public class ItemObject : MonoBehaviour
     public void SetupItem(ItemData _itemData, Vector2 _velocity)
     {
         itemData = _itemData;
-        rb.velocity = _velocity;
+        rb.linearVelocity = _velocity;
         SetupVisuals();
     }
 
@@ -37,13 +37,13 @@ public class ItemObject : MonoBehaviour
     {
         if (itemData.itemType == ItemType.Equipment && !Inventory.instance.CanAddItem())
         {
-            rb.velocity = new Vector2(0, 7);
+            rb.linearVelocity = new Vector2(0, 7);
             PlayerManager.instance.player.fX.CreatePopUpText("Equipment Inventory Full");
             return;
         }
         else if (itemData.itemType == ItemType.Material && !Inventory.instance.CanAddToStash())
         {
-            rb.velocity = new Vector2(0, 7);
+            rb.linearVelocity = new Vector2(0, 7);
             PlayerManager.instance.player.fX.CreatePopUpText("Material Stash Full");
             return;
         }

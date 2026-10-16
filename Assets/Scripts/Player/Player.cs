@@ -271,6 +271,6 @@ public partial class Player : Entity
     {
         knockbackPower = new Vector2(0, 0);
         if (!isKnocked)
-            rb.velocity = Vector2.zero;
+            rb.linearVelocity = Vector2.zero;
     }
 }

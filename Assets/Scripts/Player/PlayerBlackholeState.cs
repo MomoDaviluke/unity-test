@@ -58,13 +58,13 @@ public class PlayerBlackholeState : PlayerState
         // ---- 上升阶段 ----
         if (stateTimer > 0)
         {
-            rb.velocity = new Vector2(0, 15);
+            rb.linearVelocity = new Vector2(0, 15);
         }
 
         // ---- 释放黑洞阶段 ----
         if (stateTimer < 0)
         {
-            rb.velocity = new Vector2(0, -.1f);
+            rb.linearVelocity = new Vector2(0, -.1f);
 
             if (!skillUsed)
             {

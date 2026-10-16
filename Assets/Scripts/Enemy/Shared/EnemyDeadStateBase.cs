@@ -21,7 +21,7 @@ public abstract class EnemyDeadStateBase : EnemyState
     public override void Enter()
     {
         base.Enter();
-        rb.velocity = Vector2.zero;   // 停止所有移动
+        rb.linearVelocity = Vector2.zero;   // 停止所有移动
 
         // 修复 B10：销毁调度只做一次（Enter 仅执行一次），给死亡动画 2 秒播放时间
         GameObject.Destroy(enemy.gameObject, 2f);

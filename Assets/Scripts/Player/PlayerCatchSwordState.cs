@@ -38,7 +38,7 @@ public class PlayerCatchSwordState : PlayerState
             player.Flip();
 
         // 施加接剑反冲力
-        rb.velocity = new Vector2(player.swordReturnImpact * -player.facingDir, rb.velocity.y);
+        rb.linearVelocity = new Vector2(player.swordReturnImpact * -player.facingDir, rb.linearVelocity.y);
     }
 
     public override void Exit()

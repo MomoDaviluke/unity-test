@@ -53,6 +53,6 @@ public class DeathBringerBattleState : EnemyBattleStateBase
         if (deathBringer.IsPlayerDetected() && deathBringer.IsPlayerDetected().distance < deathBringer.attackDistance - .1f)
             return;
 
-        deathBringer.SetVelocity(deathBringer.moveSpeed * moveDir, rb.velocity.y);
+        deathBringer.SetVelocity(deathBringer.moveSpeed * moveDir, rb.linearVelocity.y);
     }
 }

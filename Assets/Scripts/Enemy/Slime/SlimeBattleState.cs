@@ -54,7 +54,7 @@ public class SlimeBattleState : EnemyBattleStateBase
 
         // ---- 移动控制：距离>1 时逼近，<=1 时停止 ----
         if (Vector2.Distance(player.position, slime.transform.position) > 1)
-            slime.SetVelocity(slime.moveSpeed * slime.facingDir, rb.velocity.y);
+            slime.SetVelocity(slime.moveSpeed * slime.facingDir, rb.linearVelocity.y);
         else
             slime.SetZeroVelocity();
     }

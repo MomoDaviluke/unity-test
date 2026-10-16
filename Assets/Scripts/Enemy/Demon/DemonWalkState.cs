@@ -67,8 +67,8 @@ public class DemonWalkState : EnemyState
         // ---- 移动控制 ----
         // 距离过近时后退，距离过远时前进
         if (distanceToPlayer > demon.stopDistance)
-            demon.SetVelocity(demon.chaseSpeed * moveDir, rb.velocity.y);
+            demon.SetVelocity(demon.chaseSpeed * moveDir, rb.linearVelocity.y);
         else
-            demon.SetVelocity(demon.chaseSpeed * (-moveDir), rb.velocity.y);
+            demon.SetVelocity(demon.chaseSpeed * (-moveDir), rb.linearVelocity.y);
     }
 }

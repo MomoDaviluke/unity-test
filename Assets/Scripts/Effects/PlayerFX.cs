@@ -1,4 +1,6 @@
-using Cinemachine;
+// Cinemachine 3.x（Unity 6）：命名空间由 Cinemachine 改为 Unity.Cinemachine，
+// CinemachineImpulseSource 类名不变；2.x 的 m_DefaultVelocity 字段改为 DefaultVelocity 属性
+using Unity.Cinemachine;
 using UnityEngine;
 
 /// <summary>
@@ -57,7 +59,8 @@ public class PlayerFX : EntityFX
     // ==================== 屏幕震动 ====================
     public void ScreenShake(Vector3 _shakePower)
     {
-        screenShake.m_DefaultVelocity = new Vector3(_shakePower.x * player.facingDir, _shakePower.y) * shakeMultiplier;
+        // Cinemachine 3.x：m_DefaultVelocity 字段迁移为 DefaultVelocity 属性
+        screenShake.DefaultVelocity = new Vector3(_shakePower.x * player.facingDir, _shakePower.y) * shakeMultiplier;
         screenShake.GenerateImpulse();
     }
 

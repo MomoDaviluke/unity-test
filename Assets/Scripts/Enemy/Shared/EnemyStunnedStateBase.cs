@@ -41,7 +41,7 @@ public abstract class EnemyStunnedStateBase : EnemyState
         stateTimer = enemy.stunDuration;
 
         // 击退：与面朝方向相反的水平力 + 垂直击飞力
-        rb.velocity = new Vector2(-enemy.facingDir * enemy.stunDirection.x, enemy.stunDirection.y);
+        rb.linearVelocity = new Vector2(-enemy.facingDir * enemy.stunDirection.x, enemy.stunDirection.y);
     }
 
     public override void Exit()

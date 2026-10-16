@@ -31,7 +31,7 @@ public class PlayerDashState : PlayerState
     {
         base.Exit();
         player.skill.dash.CloneOnArrival();
-        player.SetVelocity(0, rb.velocity.y);
+        player.SetVelocity(0, rb.linearVelocity.y);
         player.stats.MakeInvincible(false);
     }
 

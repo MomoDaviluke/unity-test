@@ -22,7 +22,7 @@ public class ArcherJumpState : EnemyState
         base.Enter();
 
         // 后跳：与面朝方向相反的水平速度 + 向上的垂直速度
-        enemy.rb.velocity = new Vector2(enemy.jumpVelocity.x * -enemy.facingDir, enemy.jumpVelocity.y);
+        enemy.rb.linearVelocity = new Vector2(enemy.jumpVelocity.x * -enemy.facingDir, enemy.jumpVelocity.y);
     }
 
     public override void Exit()
@@ -35,10 +35,10 @@ public class ArcherJumpState : EnemyState
         base.Update();
 
         // 更新动画中的垂直速度参数
-        enemy.anim.SetFloat("yVelocity", rb.velocity.y);
+        enemy.anim.SetFloat("yVelocity", rb.linearVelocity.y);
 
         // 下落过程中检测到地面，返回战斗状态
-        if (rb.velocity.y < 0 && enemy.IsGroundDetected())
+        if (rb.linearVelocity.y < 0 && enemy.IsGroundDetected())
         {
             stateMachine.ChangeState(enemy.battleState);
         }

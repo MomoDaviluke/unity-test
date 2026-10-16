@@ -23,8 +23,11 @@ public class NamingTests
     public void MonoBehaviour_ClassName_Matches_FileName()
     {
         // NTFS 大小写不敏感，不能用 File.Exists 判定，需枚举真实文件名做 Ordinal 比较
+        // 扫描范围为全 Assets：Unity 6 升级后 TMP 内置化，其"Examples & Extras"示例脚本
+        // 编入 Assembly-CSharp（升级前属独立包程序集不进本集），但它们不在 Assets/Scripts
+        // 下——按自有代码约定检查时需能识别其同名文件，否则误报第三方示例。
         var fileNames = new HashSet<string>(
-            Directory.GetFiles(ScriptsDir, "*.cs", SearchOption.AllDirectories)
+            Directory.GetFiles(Application.dataPath, "*.cs", SearchOption.AllDirectories)
                      .Select(Path.GetFileNameWithoutExtension),
             StringComparer.Ordinal);
 

@@ -27,7 +27,7 @@ public class DemonTakeHitState : EnemyState
     {
         base.Enter();
         int dir = demon.transform.position.x > PlayerManager.instance.player.transform.position.x ? -1 : 1;
-        rb.velocity = new Vector2(knockbackForceX * dir, knockbackForceY);
+        rb.linearVelocity = new Vector2(knockbackForceX * dir, knockbackForceY);
     }
 
     public override void Update()
@@ -40,6 +40,6 @@ public class DemonTakeHitState : EnemyState
     public override void Exit()
     {
         base.Exit();
-        rb.velocity = Vector2.zero;
+        rb.linearVelocity = Vector2.zero;
     }
 }

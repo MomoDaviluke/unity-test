@@ -27,7 +27,7 @@ public class SlimeStunState : EnemyStunnedStateBase
     protected override void OnUpdateExtra()
     {
         // 落地后触发眩晕动画并设置无敌
-        if (rb.velocity.y < .1f && slime.IsGroundDetected())
+        if (rb.linearVelocity.y < .1f && slime.IsGroundDetected())
         {
             slime.fX.Invoke("CancelColorChange", 0);
             slime.anim.SetTrigger("Stun");

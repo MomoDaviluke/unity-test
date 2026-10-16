@@ -21,7 +21,7 @@ public class PlayerJumpState : PlayerState
     public override void Enter()
     {
         base.Enter();
-        rb.velocity = new Vector2(rb.velocity.x, player.jumpForce);
+        rb.linearVelocity = new Vector2(rb.linearVelocity.x, player.jumpForce);
     }
 
     public override void Exit()
@@ -35,13 +35,13 @@ public class PlayerJumpState : PlayerState
 
         // ---- 可变跳跃高度 ----
         // 松开跳键时减速，实现低跳（类似马里奥的跳跃手感）
-        if (InputReader.instance.JumpReleased && rb.velocity.y > 0)
+        if (InputReader.instance.JumpReleased && rb.linearVelocity.y > 0)
         {
-            rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y * player.variableJumpHeightMult);
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * player.variableJumpHeightMult);
         }
 
         // 开始下落时切换到空中状态
-        if (rb.velocity.y < 0)
+        if (rb.linearVelocity.y < 0)
         {
             stateMachine.ChangeState(player.airState);
         }

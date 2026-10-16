@@ -33,6 +33,6 @@ public class DeathBringerDeadState : EnemyState
 
         // 死亡时的击飞效果（极短时间内向上移动）
         if (stateTimer > 0)
-            rb.velocity = new Vector2(0, 10);
+            rb.linearVelocity = new Vector2(0, 10);
     }
 }

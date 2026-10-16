@@ -22,7 +22,7 @@ public class Arrow_Controller : MonoBehaviour
     private void Update()
     {
         if (canMove)
-            rb.velocity = new Vector2(xVelocity, rb.velocity.y);
+            rb.linearVelocity = new Vector2(xVelocity, rb.linearVelocity.y);
     }
 
     // ==================== 初始化 ====================

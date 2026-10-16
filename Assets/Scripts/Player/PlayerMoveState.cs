@@ -37,10 +37,10 @@ public class PlayerMoveState : PlayerGroundedState
         // ---- 平滑移动系统 ----
         // 计算目标速度与当前速度的差值，使用加速度或减速度平滑过渡
         float targetSpeed = xInput * player.moveSpeed;
-        float speedDiff = targetSpeed - rb.velocity.x;
+        float speedDiff = targetSpeed - rb.linearVelocity.x;
         float accelRate = (Mathf.Abs(targetSpeed) > 0.01f) ? player.acceleration : player.deceleration;
         float movement = Mathf.Pow(Mathf.Abs(speedDiff) * accelRate, 0.9f) * Mathf.Sign(speedDiff);
-        rb.velocity = new Vector2(rb.velocity.x + movement * Time.deltaTime, rb.velocity.y);
+        rb.linearVelocity = new Vector2(rb.linearVelocity.x + movement * Time.deltaTime, rb.linearVelocity.y);
 
         // 根据输入方向自动翻转角色朝向
         if (xInput != 0)

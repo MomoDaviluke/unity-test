@@ -1,4 +1,5 @@
-using Cinemachine;
+// Cinemachine 3.x（Unity 6）：命名空间由 Cinemachine 改为 Unity.Cinemachine
+using Unity.Cinemachine;
 using System.Collections;
 using TMPro;
 using UnityEngine;

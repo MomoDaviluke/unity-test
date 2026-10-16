@@ -167,7 +167,7 @@ public class Entity : MonoBehaviour
     {
         isKnocked = true;
         if (knockbackPower.x > 0 || knockbackPower.y > 0)
-            rb.velocity = new Vector2(knockbackPower.x * konkcbackDir, knockbackPower.y);
+            rb.linearVelocity = new Vector2(knockbackPower.x * konkcbackDir, knockbackPower.y);
 
         yield return new WaitForSeconds(knockbackDurtion); // 等待击退持续时间结束
         isKnocked = false;
@@ -191,7 +191,7 @@ public class Entity : MonoBehaviour
         if (isKnocked)
             return;
 
-        rb.velocity = new Vector2(0, 0);
+        rb.linearVelocity = new Vector2(0, 0);
     }
 
     /// <summary>
@@ -205,7 +205,7 @@ public class Entity : MonoBehaviour
         if (isKnocked)
             return;
 
-        rb.velocity = new Vector2(_xVelocity, _yVelocity);
+        rb.linearVelocity = new Vector2(_xVelocity, _yVelocity);
         FlipController(_xVelocity);
     }
     #endregion

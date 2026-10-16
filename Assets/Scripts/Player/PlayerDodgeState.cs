@@ -48,7 +48,7 @@ public class PlayerDodgeState : PlayerState
         base.Update();
 
         // 保持闪避速度
-        player.SetVelocity(player.dodgeSpeed * dodgeDirection, rb.velocity.y);
+        player.SetVelocity(player.dodgeSpeed * dodgeDirection, rb.linearVelocity.y);
 
         // 闪避时持续创建残影
         player.fX.CreateAfterImage();

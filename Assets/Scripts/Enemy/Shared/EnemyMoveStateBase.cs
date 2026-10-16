@@ -22,7 +22,7 @@ public abstract class EnemyMoveStateBase : EnemyGroundedStateBase
     {
         base.Update();   // 先执行玩家检测（发现玩家优先于巡逻）
 
-        enemy.SetVelocity(enemy.moveSpeed * enemy.facingDir, rb.velocity.y);
+        enemy.SetVelocity(enemy.moveSpeed * enemy.facingDir, rb.linearVelocity.y);
 
         // 撞墙或到达边缘：转身并回到待机
         if (enemy.IsWallDetected() || !enemy.IsGroundDetected())

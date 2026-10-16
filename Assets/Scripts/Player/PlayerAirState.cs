@@ -52,9 +52,9 @@ public class PlayerAirState : PlayerState
         if (xInput != 0)
         {
             float targetSpeed = xInput * player.moveSpeed * player.airControlMultiplier;
-            float speedDiff = targetSpeed - rb.velocity.x;
+            float speedDiff = targetSpeed - rb.linearVelocity.x;
             float movement = Mathf.Pow(Mathf.Abs(speedDiff) * player.acceleration * player.airControlMultiplier, 0.9f) * Mathf.Sign(speedDiff);
-            rb.velocity = new Vector2(rb.velocity.x + movement * Time.deltaTime, rb.velocity.y);
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x + movement * Time.deltaTime, rb.linearVelocity.y);
             player.FlipController(xInput);
         }
 

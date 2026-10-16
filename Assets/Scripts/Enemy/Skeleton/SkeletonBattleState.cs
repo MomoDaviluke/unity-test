@@ -47,12 +47,12 @@ public class SkeletonBattleState : EnemyBattleStateBase
                     stateMachine.ChangeState(skeleton.attackState);
             }
 
-            skeleton.SetVelocity(skeleton.chaseSpeed * moveDir, rb.velocity.y);
+            skeleton.SetVelocity(skeleton.chaseSpeed * moveDir, rb.linearVelocity.y);
         }
         // ---- 未检测到玩家：减速巡逻，超时或距离过远时放弃追击 ----
         else
         {
-            skeleton.SetVelocity(skeleton.moveSpeed * moveDir, rb.velocity.y);
+            skeleton.SetVelocity(skeleton.moveSpeed * moveDir, rb.linearVelocity.y);
 
             if (stateTimer < 0 || Vector2.Distance(player.position, skeleton.transform.position) > 10)
                 stateMachine.ChangeState(skeleton.idleState);
