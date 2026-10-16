@@ -78,3 +78,6 @@ crashlytics-build.properties
 # Temporary auto-generated Android Assets
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
+
+# Trae editor local IDE package (not referenced by manifest.json)
+/Packages/com.unity.ide.trae/

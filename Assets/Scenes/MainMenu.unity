@@ -1397,8 +1397,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\u5361\u65AF\u5C14\u74E6\u5C3C\u4E9A"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 4ce5ab5dc2586c14786c5fbd044c87df, type: 2}
-  m_sharedMaterial: {fileID: -2765540932396252278, guid: 4ce5ab5dc2586c14786c5fbd044c87df, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 69679388dabbbaa45afad2caf131090d, type: 2}
+  m_sharedMaterial: {fileID: 8538536552999723383, guid: 69679388dabbbaa45afad2caf131090d, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
